@@ -9,7 +9,7 @@ use cardano/transaction.{
 use config
 use crowdfunding/types.{
   BackerDatum, CampaignAction, CampaignDatum, Cancel, Cancelled, Finish,
-  Finished, Refund, Running,
+  Finished, Refund, Running, state_token_address,
 }
 use crowdfunding/utils
 use test_kit/time/unwrap
@@ -90,8 +90,8 @@ fn validate_create_campaign(
   expect unwrap.finite_start_of(tx.validity_range) < deadline
   and {
     must_consume_creator_nonce(tx, creator, nonce)?,
-    must_mint_state_token(tx, self_script)?,
-    must_send_state_token(tx, self_script, campaign_datum)?,
+    must_mint_state_and_reward_token(tx, self_script, campaign_datum)?,
+    must_send_state_reward_token(tx, self_script, campaign_datum)?,
   }
 }
 
@@ -110,7 +110,7 @@ fn validate_cancel_campaign(
       must_be_signed_by(tx, campaign_datum.creator.1st)?
     },
     is_running_campaign(tx.inputs, self_script)?,
-    must_send_state_token(
+    must_send_state_reward_token(
       tx,
       self_script,
       with_datum: CampaignDatum { ..campaign_datum, state: Cancelled },
@@ -134,7 +134,7 @@ fn validate_finish_campaign(
         must_be_signed_by(tx, campaign_datum.creator.1st)?
       },
       is_running_campaign(tx.inputs, self_script)?,
-      must_send_state_token(
+      must_send_state_reward_token(
         tx,
         self_script,
         with_datum: CampaignDatum { ..campaign_datum, state: Finished },
@@ -275,35 +275,46 @@ fn must_refund(
   (output_lovelace >= input_lovelace)?
 }
 
-fn must_send_state_token(
+fn must_send_state_reward_token(
   tx: Transaction,
   self_script: PolicyId,
   with_datum: CampaignDatum,
 ) -> Bool {
   let with_datum_data: Data = with_datum
   let self_address = address.from_script(self_script)
-  let Output { address, datum, value, .. } <- list.any(tx.outputs)
+  let counter = {
+    let Output { address, datum, value, .. } <- list.count(tx.outputs)
 
-  when datum is {
-    // only handle inline datum
-    InlineDatum(output_datum) -> and {
-        address == self_address,
-        output_datum == with_datum_data,
-        assets.quantity_of(value, self_script, config.state_token) == 1,
-      }
+    when datum is {
+      // STATE token to state_token addr
+      InlineDatum(output_datum) -> and {
+          address == state_token_address,
+          output_datum == with_datum_data,
+          assets.quantity_of(value, self_script, config.state_token) == 1,
+        }
 
-    // does not handle non-inline datum
-    _ -> False
+      // REWARD token to self script addr
+      _ -> and {
+          address == self_address,
+          assets.quantity_of(value, self_script, with_datum.name) == with_datum.fraction,
+        }
+    }
   }
+  counter == 2
 }
 
-// ### Campaign Creation: "STATE_TOKEN" NFT Minting
+// ### Campaign Creation: "STATE_TOKEN" and  "REWARD" token Minting
 
-fn must_mint_state_token(tx: Transaction, self_script: PolicyId) -> Bool {
+fn must_mint_state_and_reward_token(
+  tx: Transaction,
+  self_script: PolicyId,
+  datum: CampaignDatum,
+) -> Bool {
+  let CampaignDatum { name, fraction, .. } = datum
   let minted_tokens = tx.mint |> assets.tokens(self_script) |> dict.to_pairs()
 
   // restrict minting to 1 quantity and 1 asset name with self Policy ID
-  ([Pair(config.state_token, 1)] == minted_tokens)?
+  [Pair(config.state_token, 1), Pair(name, fraction)] == minted_tokens
 }
 
 fn must_consume_creator_nonce(

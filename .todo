@@ -1,13 +1,13 @@
 1. Create Campaign
 
-   - user will apply for Campaign , will mint  STATE_TOKEN
-   - REWARD token will be minted too of predefined qty
-   - REWARD token will be stored in self script
-   - REWARD token will have same metadata as STATE_TOKEN
-   - STATE_TOKEN will go to predefined simple script_address
-   - STATE_TOKEN metadata will contian Campaign description
-   - goal/amount > 0
+   DONE - goal/amount > 0
+   DONE - user will apply for Campaign , will mint  STATE_TOKEN
+   DONE - REWARD token will be minted too of predefined qty
+   DONE - REWARD token will be stored in self script
+   DONE - STATE_TOKEN will go to predefined simple script_address
    - Deadline should be present > Now(time)
+   OFFCHAIN - REWARD token will have same metadata as STATE_TOKEN
+   OFFCHAIN - STATE_TOKEN metadata will contian Campaign description
 
 2. Cancel Campaign
 

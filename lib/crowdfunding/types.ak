@@ -1,4 +1,5 @@
 use aiken/crypto.{VerificationKeyHash}
+use cardano/address.{Address, Script}
 use cardano/assets.{Lovelace}
 
 pub type PaymentKeyHash =
@@ -21,6 +22,7 @@ pub type CampaignDatum {
   deadline: Int,
   creator: (PaymentKeyHash, StakeKeyHash),
   state: CampaignState,
+  fraction: Int,
 }
 
 pub type BackerDatum =
@@ -33,3 +35,12 @@ pub type CampaignAction {
   Finish
   Refund
 }
+
+const state_token_script =
+  #"70840826b6f202d0b9a1ade2b75b5eca9d326e6a9c7117c071ab4704"
+
+pub const state_token_address =
+  Address {
+    payment_credential: Script(state_token_script),
+    stake_credential: None,
+  }
