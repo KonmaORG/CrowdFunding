@@ -20,11 +20,19 @@ pub fn validate_mint_campaign(
   platform _platform: VerificationKeyHash,
   creator: VerificationKeyHash,
   nonce: OutputReference,
+  fraction: Int,
   campaign_datum: CampaignDatum,
   self_script: PolicyId,
   tx: Transaction,
 ) -> Bool {
-  tx |> validate_create_campaign(self_script, campaign_datum, nonce, creator)
+  tx
+    |> validate_create_campaign(
+        self_script,
+        campaign_datum,
+        nonce,
+        creator,
+        fraction,
+      )
 }
 
 /// Validates the following actions:
@@ -82,6 +90,7 @@ fn validate_create_campaign(
   campaign_datum: CampaignDatum,
   nonce: OutputReference,
   creator: VerificationKeyHash,
+  fraction: Int,
 ) -> Bool {
   expect CampaignDatum { goal, deadline, creator: (pkh, _), state: Running, .. } =
     campaign_datum
@@ -90,7 +99,7 @@ fn validate_create_campaign(
   expect unwrap.finite_start_of(tx.validity_range) < deadline
   and {
     must_consume_creator_nonce(tx, creator, nonce)?,
-    must_mint_state_and_reward_token(tx, self_script, campaign_datum)?,
+    must_mint_state_and_reward_token(tx, self_script, campaign_datum, fraction)?,
     must_send_state_reward_token(tx, self_script, campaign_datum)?,
   }
 }
@@ -309,8 +318,9 @@ fn must_mint_state_and_reward_token(
   tx: Transaction,
   self_script: PolicyId,
   datum: CampaignDatum,
+  fraction: Int,
 ) -> Bool {
-  let CampaignDatum { name, fraction, .. } = datum
+  let CampaignDatum { name, .. } = datum
   let minted_tokens = tx.mint |> assets.tokens(self_script) |> dict.to_pairs()
 
   // restrict minting to 1 quantity and 1 asset name with self Policy ID
@@ -331,5 +341,20 @@ fn must_consume_creator_nonce(
   and {
     output_reference == nonce,
     VerificationKey(creator) == payment_credential,
+  }
+}
+
+pub fn support_campaign(
+  tx: Transaction,
+  policy_id: PolicyId,
+  datum: CampaignDatum,
+) {
+  let CampaignDatum(name, fraction, ..) = datum
+  expect [Pair(asset_name, qty)] =
+    tx.mint |> assets.tokens(policy_id) |> dict.to_pairs()
+
+  and {
+    asset_name == name,
+    qty == fraction,
   }
 }

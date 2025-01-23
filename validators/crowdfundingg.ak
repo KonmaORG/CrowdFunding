@@ -8,6 +8,7 @@ validator campaign(
   platform: VerificationKeyHash,
   creator: VerificationKeyHash,
   nonce: OutputReference,
+  fraction: Int,
 ) {
   mint(
     redeemer campaign_datum: CampaignDatum,
@@ -18,6 +19,7 @@ validator campaign(
       platform,
       creator,
       nonce,
+      fraction,
       campaign_datum,
       self_script,
       tx,
