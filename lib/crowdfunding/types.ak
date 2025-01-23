@@ -1,6 +1,5 @@
 use aiken/crypto.{VerificationKeyHash}
 use cardano/address.{Address, Script}
-use cardano/assets.{Lovelace}
 
 pub type PaymentKeyHash =
   VerificationKeyHash
@@ -18,7 +17,7 @@ pub type CampaignState {
 
 pub type CampaignDatum {
   name: ByteArray,
-  goal: Lovelace,
+  goal: Int,
   deadline: Int,
   creator: (PaymentKeyHash, StakeKeyHash),
   state: CampaignState,

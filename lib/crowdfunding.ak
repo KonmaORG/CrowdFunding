@@ -345,16 +345,54 @@ fn must_consume_creator_nonce(
 }
 
 pub fn support_campaign(
-  tx: Transaction,
-  policy_id: PolicyId,
+  outputs: List<Output>,
   datum: CampaignDatum,
+  self_script: PolicyId,
 ) {
-  let CampaignDatum(name, fraction, ..) = datum
-  expect [Pair(asset_name, qty)] =
-    tx.mint |> assets.tokens(policy_id) |> dict.to_pairs()
+  let CampaignDatum { name, goal, fraction, .. } = datum
+  let fraction_amount = goal / fraction
 
+  let (backer_reward_token, script_reward_token) =
+    find_output_from_PID(outputs, self_script, name)
+
+  let (backer_amount, script_token) =
+    find_output_from_addr(outputs, self_script, name)
   and {
-    asset_name == name,
-    qty == fraction,
+    script_reward_token == script_token,
+    backer_amount / fraction_amount == backer_reward_token,
   }
+}
+
+pub fn find_output_from_PID(
+  outputs: List<Output>,
+  policy_id: PolicyId,
+  name: ByteArray,
+) {
+  expect [supporter_output,
+    script_output] =
+    list.filter(
+      outputs,
+      fn(output) {
+        let has_reward_token = output.value |> assets.tokens(policy_id)
+        !dict.is_empty(has_reward_token)
+      },
+    )
+  let reward_token_to_backer =
+    assets.quantity_of(supporter_output.value, policy_id, name)
+  let script_token = assets.quantity_of(script_output.value, policy_id, name)
+
+  (reward_token_to_backer, script_token)
+}
+
+pub fn find_output_from_addr(
+  outputs: List<Output>,
+  self_script: PolicyId,
+  name: ByteArray,
+) {
+  let address = Address(Script(self_script), None)
+  expect [script_output,
+    backers_amount_output] =
+    list.filter(outputs, fn(output) { output.address == address })
+  let script_token = assets.quantity_of(script_output.value, self_script, name)
+  (assets.lovelace_of(backers_amount_output.value), script_token)
 }

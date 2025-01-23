@@ -5,14 +5,15 @@
    DONE - REWARD token will be minted too of predefined qty
    DONE - REWARD token will be stored in self script
    DONE - STATE_TOKEN will go to predefined simple script_address
-   DONE - Deadline should be present > Now(time)
+   DONE - Deadline should be present > Now(time) - REWARD token UTxO with campaign datum
    OFFCHAIN - REWARD token will have same metadata as STATE_TOKEN
    OFFCHAIN - STATE_TOKEN metadata will contian Campaign description
 
 2. Support Campaign
 
-   - suporter can support campaign only with predefined amount
-   - support should get fraction REWARD token
+   DONE - suporter can support campaign only with predefined amount
+
+   DONE - support should get fraction REWARD token
 
 3. Cancel Campaign
 
