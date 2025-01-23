@@ -9,7 +9,7 @@ use cardano/transaction.{
 use config
 use crowdfunding/types.{
   BackerDatum, CampaignAction, CampaignDatum, Cancel, Cancelled, Finish,
-  Finished, Refund, Running, state_token_address,
+  Finished, Refund, Running,
 }
 use crowdfunding/utils
 use test_kit/time/unwrap
@@ -20,10 +20,10 @@ pub fn validate_mint_campaign(
   platform _platform: VerificationKeyHash,
   creator: VerificationKeyHash,
   nonce: OutputReference,
-  fraction: Int,
   campaign_datum: CampaignDatum,
   self_script: PolicyId,
   tx: Transaction,
+  state_token_script: Address,
 ) -> Bool {
   tx
     |> validate_create_campaign(
@@ -31,7 +31,7 @@ pub fn validate_mint_campaign(
         campaign_datum,
         nonce,
         creator,
-        fraction,
+        state_token_script,
       )
 }
 
@@ -48,6 +48,7 @@ pub fn validate_spend_campaign(
   campaign_action: CampaignAction,
   o_ref: OutputReference,
   tx: Transaction,
+  state_token_script: Address,
 ) -> Bool {
   expect Some(Input { output: Output { address, .. }, .. }) =
     tx.inputs |> transaction.find_input(o_ref)
@@ -57,14 +58,28 @@ pub fn validate_spend_campaign(
     // Cancel campaign:
     (Some(current_datum), Cancel) ->
       if current_datum is campaign_datum: CampaignDatum {
-        tx |> validate_cancel_campaign(self_script, campaign_datum, platform)
+        tx
+          |> validate_cancel_campaign(
+              self_script,
+              campaign_datum,
+              platform,
+              state_token_script,
+            )
+      } else if current_datum is backer_datum: BackerDatum {
+        tx |> validate_refund_support(self_script, backer_datum)
       } else {
         fail @"Invalid Cancel Datum Type! Must be CampaignDatum"
       }
 
     // Finish campaign:
     (Some(current_datum), Finish) ->
-      tx |> validate_finish_campaign(self_script, current_datum, platform)
+      tx
+        |> validate_finish_campaign(
+            self_script,
+            current_datum,
+            platform,
+            state_token_script,
+          )
 
     // Refund campaign:
     (Some(current_datum), Refund) ->
@@ -90,7 +105,7 @@ fn validate_create_campaign(
   campaign_datum: CampaignDatum,
   nonce: OutputReference,
   creator: VerificationKeyHash,
-  fraction: Int,
+  state_token_script: Address,
 ) -> Bool {
   expect CampaignDatum { goal, deadline, creator: (pkh, _), state: Running, .. } =
     campaign_datum
@@ -99,8 +114,13 @@ fn validate_create_campaign(
   expect unwrap.finite_start_of(tx.validity_range) < deadline
   and {
     must_consume_creator_nonce(tx, creator, nonce)?,
-    must_mint_state_and_reward_token(tx, self_script, campaign_datum, fraction)?,
-    must_send_state_reward_token(tx, self_script, campaign_datum)?,
+    must_mint_state_and_reward_token(tx, self_script, campaign_datum)?,
+    must_send_state_reward_token(
+      tx,
+      self_script,
+      state_token_script,
+      campaign_datum,
+    )?,
   }
 }
 
@@ -109,6 +129,7 @@ fn validate_cancel_campaign(
   self_script: PolicyId,
   campaign_datum: CampaignDatum,
   platform: VerificationKeyHash,
+  state_token_script: Address,
 ) -> Bool {
   // platform can only cancel after deadline, creator can cancel at anytime
   let is_signed_by_platform = tx |> must_be_signed_by(platform)
@@ -122,6 +143,7 @@ fn validate_cancel_campaign(
     must_send_state_reward_token(
       tx,
       self_script,
+      state_token_script,
       with_datum: CampaignDatum { ..campaign_datum, state: Cancelled },
     )?,
   }
@@ -132,6 +154,7 @@ fn validate_finish_campaign(
   self_script: PolicyId,
   current_datum: Data,
   platform: VerificationKeyHash,
+  state_token_script: Address,
 ) -> Bool {
   if current_datum is campaign_datum: CampaignDatum {
     // platform can only finish after deadline, creator can finish early whevener the goal is reached
@@ -146,6 +169,7 @@ fn validate_finish_campaign(
       must_send_state_reward_token(
         tx,
         self_script,
+        state_token_script,
         with_datum: CampaignDatum { ..campaign_datum, state: Finished },
       )?,
       must_reach_goal_and_send_to_creator(
@@ -287,6 +311,7 @@ fn must_refund(
 fn must_send_state_reward_token(
   tx: Transaction,
   self_script: PolicyId,
+  state_token_address: Address,
   with_datum: CampaignDatum,
 ) -> Bool {
   let with_datum_data: Data = with_datum
@@ -295,9 +320,13 @@ fn must_send_state_reward_token(
     let Output { address, datum, value, .. } <- list.count(tx.outputs)
 
     when datum is {
-      // STATE token to state_token addr
+      // STATE token to state_token addr or self_script if state is not running
       InlineDatum(output_datum) -> and {
-          address == state_token_address,
+          if with_datum.state == Running {
+            address == state_token_address
+          } else {
+            address == self_address
+          },
           output_datum == with_datum_data,
           assets.quantity_of(value, self_script, config.state_token) == 1,
         }
@@ -318,9 +347,8 @@ fn must_mint_state_and_reward_token(
   tx: Transaction,
   self_script: PolicyId,
   datum: CampaignDatum,
-  fraction: Int,
 ) -> Bool {
-  let CampaignDatum { name, .. } = datum
+  let CampaignDatum { name, fraction, .. } = datum
   let minted_tokens = tx.mint |> assets.tokens(self_script) |> dict.to_pairs()
 
   // restrict minting to 1 quantity and 1 asset name with self Policy ID

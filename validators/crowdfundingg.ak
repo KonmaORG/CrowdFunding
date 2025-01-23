@@ -1,4 +1,5 @@
 use aiken/crypto.{VerificationKeyHash}
+use cardano/address.{Address}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{OutputReference, Transaction}
 use crowdfunding
@@ -8,7 +9,7 @@ validator campaign(
   platform: VerificationKeyHash,
   creator: VerificationKeyHash,
   nonce: OutputReference,
-  fraction: Int,
+  state_token_script: Address,
 ) {
   mint(
     redeemer campaign_datum: CampaignDatum,
@@ -19,10 +20,10 @@ validator campaign(
       platform,
       creator,
       nonce,
-      fraction,
       campaign_datum,
       self_script,
       tx,
+      state_token_script,
     )
   }
 
@@ -40,6 +41,7 @@ validator campaign(
       redeemer,
       o_ref,
       tx,
+      state_token_script,
     )
   }
 
