@@ -1,16 +1,18 @@
 1. Create Campaign
-   DONE - goal/amount/ask > 0
-   DONE - user will apply for Campaign , will mint STATE_TOKEN
-   DONE - REWARD token will be minted too of predefined qty
-   DONE - REWARD token will be stored in self script
-   DONE - STATE_TOKEN will go to predefined simple script_address
-   DONE - Deadline should be present > Now(time) - REWARD token UTxO with campaign datum
+   ✅ Deadline should be present > Now(time)
+   ✅ goal/amount/ask > 0
+   ✅ Comsume Nonce/Oref
+   ✅ REWARD token will be minted of predefined qty
+   ✅ REWARD token UTxO with campaign datum to self_script
+   ✅ STATE_TOKEN will be minted and sent to State_token_Script
+   ✅ STATE_TOKEN will go to state_token_script
+
    OFFCHAIN - REWARD token will have same metadata as STATE_TOKEN
    OFFCHAIN - STATE_TOKEN metadata will contian Campaign description
 
 2. Support Campaign
-   DONE - suporter can support campaign only with predefined amount
-   DONE - support should get fraction REWARD token
+   suporter can support campaign only with predefined amount
+   support should get fraction REWARD token
 
 3. Cancel Campaign
 
@@ -27,3 +29,5 @@
 Milestone Based Payment released
 5% fee for platform
 multisig at time of finish
+
+TODO: remove use test_kit/time/unwrap
