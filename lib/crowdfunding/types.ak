@@ -27,6 +27,11 @@ pub type CampaignDatum {
 pub type BackerDatum =
   (PaymentKeyHash, StakeKeyHash)
 
+pub type Multisig {
+  required: Int,
+  signers: List<VerificationKeyHash>,
+}
+
 // ## Redeemer
 
 pub type CampaignAction {

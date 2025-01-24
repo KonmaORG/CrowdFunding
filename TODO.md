@@ -25,10 +25,12 @@
    ✅ funds should go to creator 
    - or escrow
    ✅ STATE_TOKEN state=Finish
-
+   ✅ must be signed by MultiSig
+   
+---
 Milestone Based Payment released
-5% fee for platform
-multisig at time of finish
+✅ 5% fee for platform
+✅ multisig at time of finish
 
 TODO: remove use test_kit/time/unwrap
 TODO: Take a look at utils.must_refund Function

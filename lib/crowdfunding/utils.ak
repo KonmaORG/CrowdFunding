@@ -8,7 +8,8 @@ use cardano/transaction.{
 }
 use config
 use crowdfunding/types.{
-  BackerDatum, CampaignDatum, Initiated, PaymentKeyHash, Running, StakeKeyHash,
+  BackerDatum, CampaignDatum, Initiated, Multisig, PaymentKeyHash, Running,
+  StakeKeyHash,
 }
 use test_kit/time/unwrap
 
@@ -254,4 +255,26 @@ pub fn calculate_payout_platform_creator(amount: Int) -> (Int, Int) {
   let platform = amount * 5 / 100
   let seller = amount - platform
   (platform, seller)
+}
+
+pub fn atleast_signedby(
+  signatories: List<VerificationKeyHash>,
+  atleast_signatories: Multisig,
+) -> Bool {
+  let Multisig { required, signers } = atleast_signatories
+  (required <= list.count(signers, fn(signer) { list.has(signatories, signer) }))?
+}
+
+pub fn ref_inputs_to_multisig_datum(
+  inputs: List<Input>,
+  config_nft: PolicyId,
+) -> Multisig {
+  expect Some(ref_input) =
+    list.find(
+      inputs,
+      fn(input) { list.has(input.output.value |> assets.policies, config_nft) },
+    )
+  expect InlineDatum(data) = ref_input.output.datum
+  expect datum: Multisig = data
+  datum
 }

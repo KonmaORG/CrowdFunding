@@ -3,7 +3,8 @@ use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Input, Output, OutputReference, Transaction}
 use crowdfunding/types.{
-  BackerDatum, CampaignAction, CampaignDatum, Cancel, Finish, Refund, Support,
+  BackerDatum, CampaignAction, CampaignDatum, Cancel, Finish, Multisig, Refund,
+  Support,
 }
 use crowdfunding/utils
 use functions.{
@@ -16,6 +17,7 @@ validator campaign(
   creator: VerificationKeyHash,
   nonce: OutputReference,
   state_token_script: Address,
+  config_nft: PolicyId,
 ) {
   mint(
     redeemer campaign_datum: CampaignDatum,
@@ -66,14 +68,18 @@ validator campaign(
         }
 
       // Finish campaign:
-      (Some(current_datum), Finish) ->
+      (Some(current_datum), Finish) -> {
+        expect multisig: Multisig =
+          utils.ref_inputs_to_multisig_datum(tx.reference_inputs, config_nft)
         validate_finish_campaign(
           tx,
           self_script,
           current_datum,
           platform,
           state_token_script,
+          multisig,
         )
+      }
       // Refund campaign:
       (Some(current_datum), Refund) ->
         if current_datum is backer_datum: BackerDatum {

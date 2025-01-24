@@ -3,7 +3,7 @@ use cardano/address.{Address}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Output, OutputReference, Transaction}
 use crowdfunding/types.{
-  BackerDatum, CampaignDatum, Cancelled, Finished, Initiated,
+  BackerDatum, CampaignDatum, Cancelled, Finished, Initiated, Multisig,
 }
 use crowdfunding/utils
 use test_kit/time/unwrap
@@ -97,6 +97,7 @@ pub fn validate_finish_campaign(
   current_datum: Data,
   platform: VerificationKeyHash,
   state_token_script: Address,
+  multisig: Multisig,
 ) -> Bool {
   if current_datum is campaign_datum: CampaignDatum {
     // platform can only finish after deadline, creator can finish early whevener the goal is reached
@@ -107,6 +108,7 @@ pub fn validate_finish_campaign(
       } else {
         utils.must_be_signed_by(tx, campaign_datum.creator.1st)?
       },
+      utils.atleast_signedby(tx.extra_signatories, multisig),
       utils.is_running_campaign(tx.inputs, self_script)?,
       utils.must_send_state_reward_token(
         tx,
