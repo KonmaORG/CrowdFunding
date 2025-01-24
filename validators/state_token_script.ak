@@ -1,6 +1,7 @@
 use aiken/crypto.{VerificationKeyHash}
 use cardano/transaction.{Transaction}
-use crowdfunding/types.{CampaignDatum, Multisig}
+use crowdfunding/types.{CampaignDatum, ConfigDatum}
+use crowdfunding/utils
 
 validator state_token_script(platform: VerificationKeyHash) {
   spend(datum: Option<Data>, _redeemer, _oref, tx: Transaction) {
@@ -10,8 +11,8 @@ validator state_token_script(platform: VerificationKeyHash) {
         ([platform] == tx.extra_signatories)?,
         ([campaign_datum.creator.1st] == tx.extra_signatories)?,
       }
-    } else if datum is multisig: Multisig {
-      True
+    } else if datum is config_datum: ConfigDatum {
+      utils.atleast_signedby(tx.extra_signatories, config_datum.multisig)
     } else {
       True
     }

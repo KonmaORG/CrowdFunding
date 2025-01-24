@@ -3,8 +3,8 @@ use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Input, Output, OutputReference, Transaction}
 use crowdfunding/types.{
-  BackerDatum, CampaignAction, CampaignDatum, Cancel, Finish, Multisig, Refund,
-  Support,
+  BackerDatum, CampaignAction, CampaignDatum, Cancel, ConfigDatum, Finish,
+  Refund, Support,
 }
 use crowdfunding/utils
 use functions.{
@@ -13,10 +13,8 @@ use functions.{
 }
 
 validator campaign(
-  platform: VerificationKeyHash,
   creator: VerificationKeyHash,
   nonce: OutputReference,
-  state_token_script: Address,
   config_nft: PolicyId,
 ) {
   mint(
@@ -24,6 +22,8 @@ validator campaign(
     policy_id self_script: PolicyId,
     tx: Transaction,
   ) {
+    let ConfigDatum { state_token_script, .. } =
+      utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
     validate_create_campaign(
       tx,
       self_script,
@@ -43,6 +43,8 @@ validator campaign(
     expect Some(Input { output: Output { address, .. }, .. }) =
       transaction.find_input(tx.inputs, o_ref)
     expect Script(self_script) = address.payment_credential
+    let ConfigDatum { multisig, platform, state_token_script } =
+      utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
     when (datum, redeemer) is {
       // Support campaign:
       (Some(current_datum), Support) ->
@@ -68,9 +70,7 @@ validator campaign(
         }
 
       // Finish campaign:
-      (Some(current_datum), Finish) -> {
-        expect multisig: Multisig =
-          utils.ref_inputs_to_multisig_datum(tx.reference_inputs, config_nft)
+      (Some(current_datum), Finish) ->
         validate_finish_campaign(
           tx,
           self_script,
@@ -79,7 +79,6 @@ validator campaign(
           state_token_script,
           multisig,
         )
-      }
       // Refund campaign:
       (Some(current_datum), Refund) ->
         if current_datum is backer_datum: BackerDatum {

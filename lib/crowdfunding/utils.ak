@@ -8,8 +8,8 @@ use cardano/transaction.{
 }
 use config
 use crowdfunding/types.{
-  BackerDatum, CampaignDatum, Initiated, Multisig, PaymentKeyHash, Running,
-  StakeKeyHash,
+  BackerDatum, CampaignDatum, ConfigDatum, Initiated, Multisig, PaymentKeyHash,
+  Running, StakeKeyHash,
 }
 use test_kit/time/unwrap
 
@@ -265,16 +265,16 @@ pub fn atleast_signedby(
   (required <= list.count(signers, fn(signer) { list.has(signatories, signer) }))?
 }
 
-pub fn ref_inputs_to_multisig_datum(
+pub fn ref_inputs_to_config_datum(
   inputs: List<Input>,
   config_nft: PolicyId,
-) -> Multisig {
+) -> ConfigDatum {
   expect Some(ref_input) =
     list.find(
       inputs,
       fn(input) { list.has(input.output.value |> assets.policies, config_nft) },
     )
   expect InlineDatum(data) = ref_input.output.datum
-  expect datum: Multisig = data
+  expect datum: ConfigDatum = data
   datum
 }

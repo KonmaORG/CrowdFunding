@@ -1,4 +1,5 @@
 use aiken/crypto.{VerificationKeyHash}
+use cardano/address.{Address}
 
 pub type PaymentKeyHash =
   VerificationKeyHash
@@ -26,6 +27,12 @@ pub type CampaignDatum {
 
 pub type BackerDatum =
   (PaymentKeyHash, StakeKeyHash)
+
+pub type ConfigDatum {
+  multisig: Multisig,
+  state_token_script: Address,
+  platform: VerificationKeyHash,
+}
 
 pub type Multisig {
   required: Int,
