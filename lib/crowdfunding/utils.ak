@@ -2,7 +2,7 @@ use aiken/collection/dict
 use aiken/collection/list
 use aiken/crypto.{VerificationKeyHash}
 use cardano/address.{Address, Inline, Script, VerificationKey}
-use cardano/assets.{PolicyId}
+use cardano/assets.{Lovelace, PolicyId}
 use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Transaction,
 }
@@ -153,4 +153,48 @@ pub fn must_refund(
   let output_lovelace = list.reduce(tx.outputs, 0, sum_output)
 
   (output_lovelace >= input_lovelace)?
+}
+
+pub fn must_reach_goal_and_send_to_creator(
+  tx: Transaction,
+  self_script: PolicyId,
+  goal: Lovelace,
+  (creator_pkh, creator_skh),
+) {
+  let self_address = Address(Script(self_script), None)
+
+  // helper fn to sum backer supports from TxInputs
+  let sum_support =
+    fn(sum, Input { output: Output { address, datum, value, .. }, .. }) {
+      if address == self_address {
+        when datum is {
+          InlineDatum(input_datum) ->
+            if input_datum is BackerDatum {
+              assets.lovelace_of(value) + sum
+            } else {
+              sum
+            }
+          _ -> sum
+        }
+      } else {
+        sum
+      }
+    }
+  // backer supports must reach goal (sum_support >= goal)?
+  let supports = tx.inputs |> list.reduce(0, sum_support)
+  expect supports >= goal
+
+  let creator_address = (creator_pkh, creator_skh) |> address_from_tuple
+
+  // helper fn to sum TxOutputs Lovelace sent to creator
+  let sum_creator =
+    fn(sum, Output { address, value, .. }) {
+      if address == creator_address {
+        assets.lovelace_of(value) + sum
+      } else {
+        sum
+      }
+    }
+  // creator must receive backer supports (sum_creator >= sum_support)?
+  (list.reduce(tx.outputs, 0, sum_creator) >= supports)?
 }

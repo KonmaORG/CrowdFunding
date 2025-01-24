@@ -2,10 +2,13 @@ use aiken/crypto.{VerificationKeyHash}
 use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Input, Output, OutputReference, Transaction}
-use crowdfunding/types.{BackerDatum, CampaignAction, CampaignDatum, Cancel}
+use crowdfunding/types.{
+  BackerDatum, CampaignAction, CampaignDatum, Cancel, Finish,
+}
 use crowdfunding/utils
 use functions.{
-  validate_cancel_campaign, validate_create_campaign, validate_refund_support,
+  validate_cancel_campaign, validate_create_campaign, validate_finish_campaign,
+  validate_refund_support,
 }
 
 validator campaign(
@@ -42,18 +45,28 @@ validator campaign(
       // Cancel campaign:
       (Some(current_datum), Cancel) ->
         if current_datum is campaign_datum: CampaignDatum {
-          tx
-            |> validate_cancel_campaign(
-                self_script,
-                campaign_datum,
-                platform,
-                state_token_script,
-              )
+          validate_cancel_campaign(
+            tx,
+            self_script,
+            campaign_datum,
+            platform,
+            state_token_script,
+          )
         } else if current_datum is backer_datum: BackerDatum {
           tx |> validate_refund_support(self_script, backer_datum)
         } else {
           fail @"Invalid Cancel Datum Type! Must be CampaignDatum"
         }
+
+      // Finish campaign:
+      (Some(current_datum), Finish) ->
+        validate_finish_campaign(
+          tx,
+          self_script,
+          current_datum,
+          platform,
+          state_token_script,
+        )
 
       // NoDatum etc:
       _ -> {
