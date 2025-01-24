@@ -2,7 +2,7 @@ use aiken/crypto.{VerificationKeyHash}
 use cardano/address.{Address}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{OutputReference, Transaction}
-use crowdfunding
+use crowdfunding_a
 use crowdfunding/types.{CampaignAction, CampaignDatum}
 
 validator campaign(
@@ -16,7 +16,7 @@ validator campaign(
     policy_id self_script: PolicyId,
     tx: Transaction,
   ) {
-    crowdfunding.validate_mint_campaign(
+    crowdfunding_a.validate_mint_campaign(
       platform,
       creator,
       nonce,
@@ -33,7 +33,7 @@ validator campaign(
     o_ref: OutputReference,
     tx: Transaction,
   ) {
-    crowdfunding.validate_spend_campaign(
+    crowdfunding_a.validate_spend_campaign(
       platform,
       creator,
       nonce,

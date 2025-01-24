@@ -1,6 +1,5 @@
 1. Create Campaign
-
-   DONE - goal/amount > 0
+   DONE - goal/amount/ask > 0
    DONE - user will apply for Campaign , will mint STATE_TOKEN
    DONE - REWARD token will be minted too of predefined qty
    DONE - REWARD token will be stored in self script
@@ -10,23 +9,21 @@
    OFFCHAIN - STATE_TOKEN metadata will contian Campaign description
 
 2. Support Campaign
-
    DONE - suporter can support campaign only with predefined amount
-
    DONE - support should get fraction REWARD token
 
 3. Cancel Campaign
 
-   - user can cancel campaign before deadline
-   - funds should go back to each user who funded the campaign (addr of user from utxo.datum)
+   - user can cancel campaign at any time
+   - platform can cancel after deadline
+   - funds should go back to each user/investor who funded the campaign (addr of user from utxo.datum)
    - burn STATE_TOKEN
 
 4. Finish Campaign
-
-   - user can finish campaign after deadline OR Goal reached
-   - funds should go to creator
+   - Developer/User can finish campaign after deadline OR Goal reached
+   - funds should go to creator or escrow
    - burn STATE_TOKEN
 
-STATE_TOKEN HASH =
-
-5. Optional - platform can also cancel project but after the dedline is passed
+Milestone Based Payment released
+5% fee for platform
+multisig at time of finish
