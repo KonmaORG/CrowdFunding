@@ -198,3 +198,39 @@ pub fn must_reach_goal_and_send_to_creator(
   // creator must receive backer supports (sum_creator >= sum_support)?
   (list.reduce(tx.outputs, 0, sum_creator) >= supports)?
 }
+
+
+
+pub fn find_output_from_PID(
+  outputs: List<Output>,
+  policy_id: PolicyId,
+  name: ByteArray,
+) {
+  expect [supporter_output,
+    script_output] =
+    list.filter(
+      outputs,
+      fn(output) {
+        let has_reward_token = output.value |> assets.tokens(policy_id)
+        !dict.is_empty(has_reward_token)
+      },
+    )
+  let reward_token_to_backer =
+    assets.quantity_of(supporter_output.value, policy_id, name)
+  let script_token = assets.quantity_of(script_output.value, policy_id, name)
+
+  (reward_token_to_backer, script_token)
+}
+
+pub fn find_output_from_addr(
+  outputs: List<Output>,
+  self_script: PolicyId,
+  name: ByteArray,
+) {
+  let address = Address(Script(self_script), None)
+  expect [script_output,
+    backers_amount_output] =
+    list.filter(outputs, fn(output) { output.address == address })
+  let script_token = assets.quantity_of(script_output.value, self_script, name)
+  (assets.lovelace_of(backers_amount_output.value), script_token)
+}

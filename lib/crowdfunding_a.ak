@@ -372,7 +372,7 @@ fn must_consume_creator_nonce(
   }
 }
 
-pub fn support_campaign(
+pub fn validate_support_campaign(
   outputs: List<Output>,
   datum: CampaignDatum,
   self_script: PolicyId,

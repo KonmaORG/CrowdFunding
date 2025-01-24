@@ -30,8 +30,8 @@ pub type BackerDatum =
 // ## Redeemer
 
 pub type CampaignAction {
+  Support
   Cancel
   Finish
   Refund
 }
-

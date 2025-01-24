@@ -3,12 +3,12 @@ use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Input, Output, OutputReference, Transaction}
 use crowdfunding/types.{
-  BackerDatum, CampaignAction, CampaignDatum, Cancel, Finish,
+  BackerDatum, CampaignAction, CampaignDatum, Cancel, Finish, Refund, Support,
 }
 use crowdfunding/utils
 use functions.{
   validate_cancel_campaign, validate_create_campaign, validate_finish_campaign,
-  validate_refund_support,
+  validate_refund_support, validate_support_campaign,
 }
 
 validator campaign(
@@ -40,8 +40,15 @@ validator campaign(
   ) {
     expect Some(Input { output: Output { address, .. }, .. }) =
       transaction.find_input(tx.inputs, o_ref)
-    expect Script(self_script) = state_token_script.payment_credential
+    expect Script(self_script) = address.payment_credential
     when (datum, redeemer) is {
+      // Support campaign:
+      (Some(current_datum), Support) ->
+        if current_datum is campaign_datum: CampaignDatum {
+          validate_support_campaign(tx.outputs, campaign_datum, self_script)
+        } else {
+          fail @"Invalid Cancel Datum Type! Must be CampaignDatum"
+        }
       // Cancel campaign:
       (Some(current_datum), Cancel) ->
         if current_datum is campaign_datum: CampaignDatum {
@@ -67,7 +74,13 @@ validator campaign(
           platform,
           state_token_script,
         )
-
+      // Refund campaign:
+      (Some(current_datum), Refund) ->
+        if current_datum is backer_datum: BackerDatum {
+          tx |> validate_refund_support(self_script, backer_datum)
+        } else {
+          fail @"Invalid Refund Datum Type! Must be BackerDatum"
+        }
       // NoDatum etc:
       _ -> {
         expect !utils.is_running_campaign(tx.reference_inputs, self_script)

@@ -1,7 +1,7 @@
 use aiken/crypto.{VerificationKeyHash}
 use cardano/address.{Address}
 use cardano/assets.{PolicyId}
-use cardano/transaction.{OutputReference, Transaction}
+use cardano/transaction.{Output, OutputReference, Transaction}
 use crowdfunding/types.{
   BackerDatum, CampaignDatum, Cancelled, Finished, Initiated,
 }
@@ -35,6 +35,25 @@ pub fn validate_create_campaign(
       state_token_script,
       campaign_datum,
     )?,
+  }
+}
+
+pub fn validate_support_campaign(
+  outputs: List<Output>,
+  datum: CampaignDatum,
+  self_script: PolicyId,
+) {
+  let CampaignDatum { name, goal, fraction, .. } = datum
+  let fraction_amount = goal / fraction
+
+  let (backer_reward_token, script_reward_token) =
+    utils.find_output_from_PID(outputs, self_script, name)
+
+  let (backer_amount, script_token) =
+    utils.find_output_from_addr(outputs, self_script, name)
+  and {
+    script_reward_token == script_token,
+    backer_amount / fraction_amount == backer_reward_token,
   }
 }
 
