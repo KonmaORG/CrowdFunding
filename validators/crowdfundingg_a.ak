@@ -2,8 +2,8 @@ use aiken/crypto.{VerificationKeyHash}
 use cardano/address.{Address}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{OutputReference, Transaction}
-use crowdfunding_a
 use crowdfunding/types.{CampaignAction, CampaignDatum}
+use crowdfunding_a
 
 validator campaign(
   platform: VerificationKeyHash,

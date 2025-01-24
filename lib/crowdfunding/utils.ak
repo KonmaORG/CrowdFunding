@@ -1,12 +1,17 @@
-use cardano/address.{Address, Inline, VerificationKey}
-use crowdfunding/types.{PaymentKeyHash, StakeKeyHash}
-use aiken/crypto.{VerificationKeyHash}
-use cardano/transaction.{Input, Output, OutputReference, Transaction, InlineDatum}
-use cardano/assets.{PolicyId}
-use crowdfunding/types.{CampaignDatum, Initiated}
-use aiken/collection/list
 use aiken/collection/dict
+use aiken/collection/list
+use aiken/crypto.{VerificationKeyHash}
+use cardano/address.{Address, Inline, Script, VerificationKey}
+use cardano/assets.{PolicyId}
+use cardano/transaction.{
+  InlineDatum, Input, Output, OutputReference, Transaction,
+}
 use config
+use crowdfunding/types.{
+  BackerDatum, CampaignDatum, Initiated, PaymentKeyHash, Running, StakeKeyHash,
+}
+use test_kit/time/unwrap
+
 pub fn address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
   let (pkh, skh) = key_hash_tuple
   Address {
@@ -79,4 +84,73 @@ pub fn must_send_state_reward_token(
     }
   }
   counter == 2
+}
+
+pub fn is_running_campaign(
+  tx_inputs: List<Input>,
+  self_script: PolicyId,
+) -> Bool {
+  // must consume/refer state token UTxO
+  expect Some(Input { output: Output { datum, .. }, .. }) = {
+    let input <- list.find(tx_inputs)
+    assets.quantity_of(input.output.value, self_script, config.state_token) == 1
+  }
+
+  // must be campaign inline datum
+  expect InlineDatum(campaign_datum) = datum
+  expect CampaignDatum { state, .. } = campaign_datum
+
+  state == Running
+}
+
+pub fn must_be_signed_by(tx: Transaction, signer: VerificationKeyHash) -> Bool {
+  // just expect 1 signer
+  ([signer] == tx.extra_signatories)?
+}
+
+pub fn must_be_after_deadline(tx: Transaction, deadline: Int) -> Bool {
+  // tx validFrom is after or at deadline
+  (unwrap.finite_start_of(tx.validity_range) >= deadline)?
+}
+
+pub fn must_refund(
+  tx: Transaction,
+  self_script: PolicyId,
+  backer_datum: BackerDatum,
+) {
+  let backer_datum_data: Data = backer_datum
+
+  // collect input backer support lovelaces from self address
+  let self_address = Address(Script(self_script), None)
+  let sum_input =
+    fn(sum, Input { output: Output { address, datum, value, .. }, .. }) {
+      if address == self_address {
+        when datum is {
+          InlineDatum(input_datum) ->
+            if input_datum == backer_datum_data {
+              assets.lovelace_of(value) + sum
+            } else {
+              sum
+            }
+          _ -> sum
+        }
+      } else {
+        sum
+      }
+    }
+  let input_lovelace = list.reduce(tx.inputs, 0, sum_input)
+
+  // collect output lovelaces to backer address
+  let backer_address = address_from_tuple(backer_datum)
+  let sum_output =
+    fn(sum, Output { address, value, .. }) {
+      if address == backer_address {
+        assets.lovelace_of(value) + sum
+      } else {
+        sum
+      }
+    }
+  let output_lovelace = list.reduce(tx.outputs, 0, sum_output)
+
+  (output_lovelace >= input_lovelace)?
 }

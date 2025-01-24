@@ -1,11 +1,12 @@
 use aiken/crypto.{VerificationKeyHash}
-use cardano/address.{Address}
+use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId}
-use cardano/transaction.{OutputReference, Transaction}
-use crowdfunding_a
-use crowdfunding/types.{CampaignAction, CampaignDatum}
-use functions.{validate_create_campaign}
-
+use cardano/transaction.{Input, Output, OutputReference, Transaction}
+use crowdfunding/types.{BackerDatum, CampaignAction, CampaignDatum, Cancel}
+use crowdfunding/utils
+use functions.{
+  validate_cancel_campaign, validate_create_campaign, validate_refund_support,
+}
 
 validator campaign(
   platform: VerificationKeyHash,
@@ -19,13 +20,13 @@ validator campaign(
     tx: Transaction,
   ) {
     validate_create_campaign(
-        tx,
-        self_script,
-        campaign_datum,
-        nonce,
-        creator,
-        state_token_script,
-      )
+      tx,
+      self_script,
+      campaign_datum,
+      nonce,
+      creator,
+      state_token_script,
+    )
   }
 
   spend(
@@ -34,16 +35,32 @@ validator campaign(
     o_ref: OutputReference,
     tx: Transaction,
   ) {
-    crowdfunding_a.validate_spend_campaign(
-      platform,
-      creator,
-      nonce,
-      datum,
-      redeemer,
-      o_ref,
-      tx,
-      state_token_script,
-    )
+    expect Some(Input { output: Output { address, .. }, .. }) =
+      transaction.find_input(tx.inputs, o_ref)
+    expect Script(self_script) = state_token_script.payment_credential
+    when (datum, redeemer) is {
+      // Cancel campaign:
+      (Some(current_datum), Cancel) ->
+        if current_datum is campaign_datum: CampaignDatum {
+          tx
+            |> validate_cancel_campaign(
+                self_script,
+                campaign_datum,
+                platform,
+                state_token_script,
+              )
+        } else if current_datum is backer_datum: BackerDatum {
+          tx |> validate_refund_support(self_script, backer_datum)
+        } else {
+          fail @"Invalid Cancel Datum Type! Must be CampaignDatum"
+        }
+
+      // NoDatum etc:
+      _ -> {
+        expect !utils.is_running_campaign(tx.reference_inputs, self_script)
+        tx |> utils.must_be_signed_by(platform)
+      }
+    }
   }
 
   else(_) {
