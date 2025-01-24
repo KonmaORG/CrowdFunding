@@ -160,6 +160,7 @@ pub fn must_reach_goal_and_send_to_creator(
   self_script: PolicyId,
   goal: Lovelace,
   (creator_pkh, creator_skh),
+  platform: VerificationKeyHash,
 ) {
   let self_address = Address(Script(self_script), None)
 
@@ -183,7 +184,7 @@ pub fn must_reach_goal_and_send_to_creator(
   // backer supports must reach goal (sum_support >= goal)?
   let supports = tx.inputs |> list.reduce(0, sum_support)
   expect supports >= goal
-
+  let (platform_pay, creator_pay) = calculate_payout_platform_creator(supports)
   let creator_address = (creator_pkh, creator_skh) |> address_from_tuple
 
   // helper fn to sum TxOutputs Lovelace sent to creator
@@ -195,11 +196,25 @@ pub fn must_reach_goal_and_send_to_creator(
         sum
       }
     }
+
+  let sum_platform =
+    fn(sum, Output { address, value, .. }) {
+      when address.payment_credential is {
+        VerificationKey(vkh) ->
+          if vkh == platform {
+            assets.lovelace_of(value) + sum
+          } else {
+            sum
+          }
+        _ -> sum
+      }
+    }
   // creator must receive backer supports (sum_creator >= sum_support)?
-  (list.reduce(tx.outputs, 0, sum_creator) >= supports)?
+  and {
+    list.reduce(tx.outputs, 0, sum_creator) >= creator_pay,
+    list.reduce(tx.outputs, 0, sum_platform) >= platform_pay,
+  }
 }
-
-
 
 pub fn find_output_from_PID(
   outputs: List<Output>,
@@ -233,4 +248,10 @@ pub fn find_output_from_addr(
     list.filter(outputs, fn(output) { output.address == address })
   let script_token = assets.quantity_of(script_output.value, self_script, name)
   (assets.lovelace_of(backers_amount_output.value), script_token)
+}
+
+pub fn calculate_payout_platform_creator(amount: Int) -> (Int, Int) {
+  let platform = amount * 5 / 100
+  let seller = amount - platform
+  (platform, seller)
 }

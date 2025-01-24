@@ -119,6 +119,7 @@ pub fn validate_finish_campaign(
         self_script,
         campaign_datum.goal,
         campaign_datum.creator,
+        platform,
       )?,
     }
   } else if current_datum is BackerDatum {

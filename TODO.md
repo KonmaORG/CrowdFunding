@@ -11,20 +11,20 @@
    OFFCHAIN - STATE_TOKEN metadata will contian Campaign description
 
 2. Support Campaign
-   suporter can support campaign only with predefined amount
-   support should get fraction REWARD token
+   ✅ suporter can support campaign only with predefined amount
+   ✅ supporter should get fraction REWARD token
 
 3. Cancel Campaign
-
-   - user can cancel campaign at any time
-   - platform can cancel after deadline
-   - funds should go back to each user/investor who funded the campaign (addr of user from utxo.datum)
-   - burn STATE_TOKEN
+   ✅ user can cancel campaign at any time
+   ✅ platform can cancel after deadline
+   ✅ funds should go back to each user/investor who funded the campaign (addr of user from utxo.datum)
+   ✅ STATE_TOKEN state=Cancel
 
 4. Finish Campaign
-   - Developer/User can finish campaign after deadline OR Goal reached
-   - funds should go to creator or escrow
-   - burn STATE_TOKEN
+   ✅ Developer/User can finish campaign after deadline OR Goal reached
+   ✅ funds should go to creator 
+   - or escrow
+   ✅ STATE_TOKEN state=Finish
 
 Milestone Based Payment released
 5% fee for platform
