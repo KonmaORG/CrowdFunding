@@ -1,7 +1,6 @@
-use cardano/assets.{PolicyId}
-use cardano/transaction.{OutputReference, Transaction}
-use modules/functions.{must_burn_token,
-  must_consume_utxo, must_mint_exactly_one}
+use aiken/collection/dict
+use cardano/assets.{PolicyId, Value}
+use cardano/transaction.{Input, OutputReference, Transaction, find_input}
 
 // TODO:  separate spend and mint handler
 validator identification_nft(o_ref: OutputReference) {
@@ -15,6 +14,7 @@ validator identification_nft(o_ref: OutputReference) {
         }
       // 1 = burning
       1 -> True
+      _ -> fail @"Invalid Redeemer Value"
     }
   }
 

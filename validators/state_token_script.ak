@@ -1,14 +1,16 @@
-use aiken/crypto.{VerificationKeyHash}
+use cardano/assets.{PolicyId}
 use cardano/transaction.{Transaction}
 use crowdfunding/types.{CampaignDatum, ConfigDatum}
 use crowdfunding/utils
 
-validator state_token_script(platform: VerificationKeyHash) {
+validator state_token_script(config_nft: PolicyId) {
   spend(datum: Option<Data>, _redeemer, _oref, tx: Transaction) {
     expect Some(datum) = datum
     if datum is campaign_datum: CampaignDatum {
+      let ConfigDatum { multisig, .. } =
+        utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
       or {
-        ([platform] == tx.extra_signatories)?,
+        utils.atleast_signedby(tx.extra_signatories, multisig)?,
         ([campaign_datum.creator.1st] == tx.extra_signatories)?,
       }
     } else if datum is config_datum: ConfigDatum {
