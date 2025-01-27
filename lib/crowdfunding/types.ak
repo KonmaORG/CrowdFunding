@@ -50,4 +50,5 @@ pub type CampaignAction {
   Cancel
   Finish
   Refund
+  Release
 }

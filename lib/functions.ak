@@ -98,7 +98,6 @@ pub fn validate_finish_campaign(
   tx: Transaction,
   self_script: PolicyId,
   current_datum: Data,
-  platform: VerificationKeyHash,
   state_token_script: Address,
   multisig: Multisig,
 ) -> Bool {
