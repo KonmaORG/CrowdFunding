@@ -16,6 +16,10 @@ export const siteConfig = {
       label: "Campaigns",
       href: "/campaigns",
     },
+    {
+      label: "Admin",
+      href: "/admin",
+    },
   ],
   navMenuItems: [
     {
