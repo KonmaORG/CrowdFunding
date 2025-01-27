@@ -104,15 +104,43 @@ pub fn validate_finish_campaign(
 ) -> Bool {
   if current_datum is campaign_datum: CampaignDatum {
     // platform can only finish after deadline, creator can finish early whevener the goal is reached
-    let is_signed_by_platform = tx |> utils.must_be_signed_by(platform)
+    let is_signed_by_platform =
+      utils.atleast_signedby(tx.extra_signatories, multisig)
     and {
       if is_signed_by_platform? {
         utils.must_be_after_deadline(tx, campaign_datum.deadline)?
       } else {
         utils.must_be_signed_by(tx, campaign_datum.creator.1st)?
       },
-      utils.atleast_signedby(tx.extra_signatories, multisig),
       utils.is_running_campaign(tx.inputs, self_script)?,
+      utils.must_send_state_reward_token(
+        tx,
+        self_script,
+        state_token_script,
+        with_datum: CampaignDatum { ..campaign_datum, state: Finished },
+      )?,
+    }
+  } else if current_datum is BackerDatum {
+    // must consume state token UTxO successfully
+    utils.is_running_campaign(tx.inputs, self_script)?
+  } else {
+    fail @"Invalid Finish Datum Type!"
+  }
+}
+
+pub fn validate_release_campaign(
+  tx: Transaction,
+  self_script: PolicyId,
+  current_datum: Data,
+  platform: VerificationKeyHash,
+  state_token_script: Address,
+  multisig: Multisig,
+) -> Bool {
+  if current_datum is campaign_datum: CampaignDatum {
+    // platform can only finish after deadline, creator can finish early whevener the goal is reached
+    and {
+      utils.atleast_signedby(tx.extra_signatories, multisig),
+      !utils.is_running_campaign(tx.inputs, self_script)?,
       utils.must_send_state_reward_token(
         tx,
         self_script,
@@ -122,8 +150,7 @@ pub fn validate_finish_campaign(
       utils.must_reach_goal_and_send_to_creator(
         tx,
         self_script,
-        campaign_datum.goal,
-        campaign_datum.creator,
+        campaign_datum,
         platform,
       )?,
     }

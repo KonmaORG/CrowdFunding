@@ -159,10 +159,11 @@ pub fn must_refund(
 pub fn must_reach_goal_and_send_to_creator(
   tx: Transaction,
   self_script: PolicyId,
-  goal: Lovelace,
-  (creator_pkh, creator_skh),
+  campaign_datum: CampaignDatum,
   platform: VerificationKeyHash,
 ) {
+  let CampaignDatum { goal, creator, milestone, .. } = campaign_datum
+  let remaining_milestone = list.count(milestone, fn(m) { m == False })
   let self_address = Address(Script(self_script), None)
 
   // helper fn to sum backer supports from TxInputs
@@ -186,7 +187,7 @@ pub fn must_reach_goal_and_send_to_creator(
   let supports = tx.inputs |> list.reduce(0, sum_support)
   expect supports >= goal
   let (platform_pay, creator_pay) = calculate_payout_platform_creator(supports)
-  let creator_address = (creator_pkh, creator_skh) |> address_from_tuple
+  let creator_address = address_from_tuple(creator)
 
   // helper fn to sum TxOutputs Lovelace sent to creator
   let sum_creator =
@@ -212,8 +213,8 @@ pub fn must_reach_goal_and_send_to_creator(
     }
   // creator must receive backer supports (sum_creator >= sum_support)?
   and {
-    list.reduce(tx.outputs, 0, sum_creator) >= creator_pay,
-    list.reduce(tx.outputs, 0, sum_platform) >= platform_pay,
+    list.reduce(tx.outputs, 0, sum_creator) >= creator_pay / remaining_milestone,
+    list.reduce(tx.outputs, 0, sum_platform) >= platform_pay / remaining_milestone,
   }
 }
 
