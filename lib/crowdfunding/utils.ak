@@ -278,3 +278,8 @@ pub fn ref_inputs_to_config_datum(
   expect datum: ConfigDatum = data
   datum
 }
+
+pub fn milestone_status(milestone: List<Bool>) {
+  !list.has(milestone, True)
+  // expecting milstone list to be false initially
+}

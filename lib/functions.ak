@@ -19,6 +19,7 @@ pub fn validate_create_campaign(
   expect CampaignDatum {
     goal,
     deadline,
+    milestone,
     creator: (pkh, _),
     state: Initiated,
     ..
@@ -27,6 +28,7 @@ pub fn validate_create_campaign(
   expect goal > 0
   expect unwrap.finite_start_of(tx.validity_range) < deadline
   and {
+    utils.milestone_status(milestone),
     utils.must_consume_creator_nonce(tx, creator, nonce)?,
     utils.must_mint_state_and_reward_token(tx, self_script, campaign_datum)?,
     utils.must_send_state_reward_token(

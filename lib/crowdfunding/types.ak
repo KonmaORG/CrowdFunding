@@ -14,6 +14,9 @@ pub type CampaignState {
   Finished
 }
 
+pub type Milestone =
+  List<Bool>
+
 // ## Datum
 
 pub type CampaignDatum {
@@ -21,6 +24,7 @@ pub type CampaignDatum {
   goal: Int,
   deadline: Int,
   creator: (PaymentKeyHash, StakeKeyHash),
+  milestone: Milestone,
   state: CampaignState,
   fraction: Int,
 }
