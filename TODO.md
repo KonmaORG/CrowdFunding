@@ -22,15 +22,48 @@
 
 4. Finish Campaign
    ✅ Developer/User can finish campaign after deadline OR Goal reached
-   ✅ funds should go to creator 
+   ✅ funds should go to creator
    - or escrow
-   ✅ STATE_TOKEN state=Finish
-   ✅ must be signed by MultiSig
-   
+     ✅ STATE_TOKEN state=Finish
+     ✅ must be signed by MultiSig
+
 ---
+
 Milestone Based Payment released
 ✅ 5% fee for platform
 ✅ multisig at time of finish
 
 TODO: remove use test_kit/time/unwrap
 TODO: Take a look at utils.must_refund Function
+
+PLATFORM = Multisig
+
+CREATE
+
+- dev = milestone/single , - if milestone ,take number of miletones, and the total amount should be divided by no. milestones
+
+- multisig will verify the data from dev, - if accepted than supportes can supoort the campaign - if not dev need to apply again
+
+SUPPORTS
+
+- reward token will be send to the supports,
+- only specfic amount can se supported
+
+CANCEL
+
+- dev or platform can cancel
+- platform can cancel after deadline
+- supports can't cancel
+- after cancel, the supoorts money will go back to there wallet
+
+- After project Finish the 5% will go to PLATFORM_single wallet
+
+FINISH
+
+- milestone
+
+  - submission from dev , multisig will verify than the amount will be given to dev (amount/no.Milesontes)
+  - charge 5% at each milestone.
+
+- single
+  - after multisig verify the amount-5% will go to dev addr
