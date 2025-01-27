@@ -1,12 +1,12 @@
 import { applyDoubleCborEncoding, Validator } from '@lucid-evolution/lucid'
 
-import { karbonstore_karbonstore_spend } from './plutus'
+import { state_token_script_state_token_script_spend, crowdfunding_campaign_spend, crowdfunding_campaign_mint, identication_nft_identification_nft_mint } from './plutus'
 
-const identificationNFT_Mint = applyDoubleCborEncoding(
-  karbonstore_karbonstore_spend
-)
+// const identificationNFT_Mint = applyDoubleCborEncoding(
+//   identication_nft_identification_nft_mint
+// )
 
-export const KarbonStoreValidator: Validator = {
-  type: 'PlutusV3',
-  script: identificationNFT_Mint,
-}
+// export const IdentificationNFT: Validator = {
+//   type: 'PlutusV3',
+//   script: identificationNFT_Mint,
+// }

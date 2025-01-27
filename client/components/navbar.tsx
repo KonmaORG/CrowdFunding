@@ -26,6 +26,7 @@ import {
   Logo,
 } from "@/components/icons";
 import WalletConnector from "./WalletConnector/client";
+import TmpWalletConnector from "./WalletConnector/tmp/tmpWalletClient";
 
 export const Navbar = () => {
   const searchInput = (
@@ -84,7 +85,8 @@ export const Navbar = () => {
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem className="hidden md:flex">
-          <WalletConnector />
+          {/* <WalletConnector /> */}
+          <TmpWalletConnector/>
         </NavbarItem>
       </NavbarContent>
 

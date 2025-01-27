@@ -17,7 +17,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@heroui/button";
+import { Button } from "../ui/button";
+
 
 export default function WalletComponent() {
   const [walletConnection, setWalletConnection] = useWallet();
