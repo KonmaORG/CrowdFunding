@@ -4,7 +4,7 @@ use aiken/crypto.{VerificationKeyHash}
 use cardano/address.{Address, Inline, Script, VerificationKey}
 use cardano/assets.{Lovelace, PolicyId}
 use cardano/transaction.{
-  InlineDatum, Input, Output, OutputReference, Transaction,
+  InlineDatum, Input, Output, OutputReference, Transaction, find_input,
 }
 use config
 use crowdfunding/types.{
@@ -282,4 +282,25 @@ pub fn ref_inputs_to_config_datum(
 pub fn milestone_status(milestone: List<Bool>) {
   !list.has(milestone, True)
   // expecting milstone list to be false initially
+}
+
+pub fn must_send_state_token(
+  tx: Transaction,
+  oref: OutputReference,
+  with_datum: CampaignDatum,
+) -> Bool {
+  let with_datum_data: Data = with_datum
+  expect Some(self_input) = find_input(tx.inputs, oref)
+  let self_address = self_input.output.address
+  let Output { address, datum, value, .. } <- list.any(tx.outputs)
+  when datum is {
+    // STATE token to state_token addr or self_script if state is not running
+    InlineDatum(output_datum) -> and {
+        address == self_address,
+        output_datum == with_datum_data,
+        value == self_input.output.value,
+      }
+
+    _ -> False
+  }
 }

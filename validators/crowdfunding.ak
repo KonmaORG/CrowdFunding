@@ -60,7 +60,7 @@ validator campaign(
             tx,
             self_script,
             campaign_datum,
-            platform,
+            multisig,
             state_token_script,
           )
         } else if current_datum is backer_datum: BackerDatum {

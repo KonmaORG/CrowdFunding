@@ -63,11 +63,12 @@ pub fn validate_cancel_campaign(
   tx: Transaction,
   self_script: PolicyId,
   campaign_datum: CampaignDatum,
-  platform: VerificationKeyHash,
+  multisig: Multisig,
   state_token_script: Address,
 ) -> Bool {
   // platform can only cancel after deadline, creator can cancel at anytime
-  let is_signed_by_platform = tx |> utils.must_be_signed_by(platform)
+  let is_signed_by_platform =
+    utils.atleast_signedby(tx.extra_signatories, multisig)
   and {
     if is_signed_by_platform? {
       utils.must_be_after_deadline(tx, campaign_datum.deadline)?
