@@ -1,8 +1,10 @@
-'use client'
+"use client";
 
-import dynamic from 'next/dynamic'
-const WalletConnector = dynamic(() => import('./walletConnector'), { ssr: false })
+import dynamic from "next/dynamic";
+const WalletConnector = dynamic(() => import("./walletConnector"), {
+  ssr: false,
+});
 
 export default function TmpWalletConnector() {
-  return <WalletConnector />
+  return <WalletConnector />;
 }

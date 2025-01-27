@@ -6,7 +6,7 @@ import { emulator } from "@/config/emulator";
 
 export const mkLucid = async (
   setWalletConnection: (value: React.SetStateAction<WalletConnection>) => void,
-  isEmulator?: boolean
+  isEmulator?: boolean,
 ): Promise<void> => {
   try {
     let lucidInstance;

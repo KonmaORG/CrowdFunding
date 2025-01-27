@@ -42,7 +42,7 @@ export default function EmulatorConnectors() {
       })
       .catch((error) =>
         // toast error
-        console.log(error)
+        console.log(error),
       );
   }, []);
 

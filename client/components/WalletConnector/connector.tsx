@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 
-
 export default function WalletComponent() {
   const [walletConnection, setWalletConnection] = useWallet();
   const { lucid, address } = walletConnection;
@@ -42,7 +41,7 @@ export default function WalletComponent() {
     }
     const updatedPreWallets = wallets.map((preWallet) => {
       const matchingWallet = installedWallets.find((provider) =>
-        provider.name.toLowerCase().includes(preWallet.name.toLowerCase())
+        provider.name.toLowerCase().includes(preWallet.name.toLowerCase()),
       );
 
       return {
