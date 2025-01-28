@@ -1,9 +1,11 @@
+import { getPolicyId } from "@/lib/utils";
 import {
   Blockfrost,
   Network,
   Provider,
   validatorToAddress,
 } from "@lucid-evolution/lucid";
+import { IdentificationNFTValidator } from "./scripts/scripts";
 
 // import { KarbonStoreValidator } from './scripts/scripts'
 export const BF_URL = process.env.NEXT_PUBLIC_BF_URL!;

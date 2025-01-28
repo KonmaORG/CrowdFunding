@@ -13,7 +13,7 @@ import {
 
 //------------------------------------------------------------------
 const identificationNFT_Mint = applyDoubleCborEncoding(
-  identication_nft_identification_nft_mint,
+  identication_nft_identification_nft_mint
 );
 
 export function IdentificationNFTValidator(params: any[]): Validator {
@@ -25,7 +25,7 @@ export function IdentificationNFTValidator(params: any[]): Validator {
 
 // ------------------------------------------------------------------
 const state_token_script = applyDoubleCborEncoding(
-  state_token_script_state_token_script_spend,
+  state_token_script_state_token_script_spend
 );
 
 export function StateTokenValidator(params: any[]): Validator {
@@ -37,7 +37,7 @@ export function StateTokenValidator(params: any[]): Validator {
 
 //   ------------------------------------------------------------------
 const crowdfunding_script = applyDoubleCborEncoding(
-  crowdfunding_campaign_spend,
+  crowdfunding_campaign_spend
 );
 
 export function CrowdfundingValidator(params: any[]): Validator {
