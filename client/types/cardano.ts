@@ -12,7 +12,7 @@ export type Wallet = {
 
 //#region Alias
 export const PaymentKeyHashSchema = Data.Bytes();
-export const StakeKeyHashSchema = Data.Bytes();
+export const StakeKeyHashSchema = Data.Nullable(Data.Bytes());
 
 export const AddressSchema = Data.Tuple([
   PaymentKeyHashSchema,
@@ -94,6 +94,9 @@ export const ConfigDatumSchema = Data.Object({
   state_token_script: AddressSchema,
   platform: Data.Bytes(),
 });
+
+export type ConfigDatum = Data.Static<typeof ConfigDatumSchema>;
+export const ConfigDatum = ConfigDatumSchema as unknown as ConfigDatum;
 //#endregion
 
 //#region Redeemer
