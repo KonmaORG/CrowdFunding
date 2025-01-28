@@ -1,8 +1,10 @@
-import { NETWORK } from "@/config";
+import { NETWORK, PROVIDER } from "@/config";
 import {
+  makeWalletFromPrivateKey,
   MintingPolicy,
   mintingPolicyToId,
   Script,
+  TxSignBuilder,
   Validator,
   validatorToAddress,
 } from "@lucid-evolution/lucid";
@@ -51,4 +53,23 @@ export function getPolicyId(validatorFucntion: { (): Validator; (): Script }) {
   const validator: MintingPolicy = validatorFucntion();
   const Pid = mintingPolicyToId(validator);
   return Pid;
+}
+
+export async function submit(tx: TxSignBuilder) {
+  try {
+    const sign = await tx.sign.withWallet().complete();
+    const txHash = await sign.submit();
+    console.log("tx", txHash);
+  } catch (e) {
+    throw e;
+  }
+}
+
+export async function privateKeytoAddress(privateKey: string) {
+  const privateeyAddress = await makeWalletFromPrivateKey(
+    PROVIDER,
+    NETWORK,
+    privateKey
+  ).address();
+  return privateeyAddress;
 }
