@@ -7,7 +7,6 @@ import {
   NavbarItem,
   NavbarMenuItem,
 } from "@heroui/navbar";
-import { Button } from "@heroui/button";
 import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
 import { Input } from "@heroui/input";
@@ -18,15 +17,10 @@ import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
-  TwitterIcon,
-  GithubIcon,
-  DiscordIcon,
-  HeartFilledIcon,
   SearchIcon,
   Logo,
 } from "@/components/icons";
 import WalletConnector from "./WalletConnector/client";
-import TmpWalletConnector from "./WalletConnector/tmp/tmpWalletClient";
 
 export const Navbar = () => {
   const searchInput = (
@@ -85,14 +79,13 @@ export const Navbar = () => {
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem className="hidden md:flex">
-          {/* <WalletConnector /> */}
-          <TmpWalletConnector />
+          <WalletConnector />
         </NavbarItem>
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
         <ThemeSwitch />
-        {/* <WalletConnector /> */}
+        <WalletConnector />
 
         <NavbarMenuToggle />
       </NavbarContent>

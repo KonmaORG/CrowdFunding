@@ -13,15 +13,18 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
 
 export default function WalletComponent() {
   const [walletConnection, setWalletConnection] = useWallet();
-  const { lucid, address } = walletConnection;
+  const { lucid, address, isEmulator } = walletConnection;
 
   const [wallets, setWallets] = useState<Wallet[]>(SUPPORTEDWALLETS);
   const [isOpen, setIsOpen] = useState(false);
@@ -110,7 +113,7 @@ export default function WalletComponent() {
               )}
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="w-fit">
             <DialogHeader>
               <DialogTitle>Connect Wallet</DialogTitle>
               <DialogDescription>
@@ -135,6 +138,31 @@ export default function WalletComponent() {
                 </Button>
               ))}
             </div>
+            <DialogFooter>
+               {/* Emulator Toggle  */}
+            <div className="flex items-center justify-between rounded-lg border p-2 mx-2 w-full">
+              <div className="space-y-0.5">
+                <Label className="text-base font-semibold">Emulator Mode</Label>
+                <p className="text-sm text-muted-foreground">
+                  This will use Emulator Accounts.
+                </p>
+              </div>
+              <Switch
+                id="emulator-toggle"
+                checked={isEmulator}
+                onCheckedChange={(checked) =>{
+                  setIsOpen(false)
+                  setTimeout(() => {
+                    setWalletConnection((prev) => ({
+                      ...prev,
+                      isEmulator: checked,
+                    }))
+                  }, 500)
+                }}
+                aria-label="Toggle emulator mode"
+              />
+            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}

@@ -8,9 +8,10 @@ export type WalletConnection = {
   wallet?: Wallet;
   address?: Address;
   balance?: number;
+  isEmulator: boolean;
 };
 
 export const WalletContext = createContext<
   [WalletConnection, Dispatch<SetStateAction<WalletConnection>>]
->([{}, () => {}]);
+>([{ isEmulator: false}, () => {}]);
 export const useWallet = () => useContext(WalletContext);

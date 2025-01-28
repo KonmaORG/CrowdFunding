@@ -7,7 +7,7 @@ import { WalletConnection, WalletContext } from "./walletContext";
 
 export default function WalletProvider(props: { children: React.ReactNode }) {
   return (
-    <WalletContext.Provider value={useState<WalletConnection>({})}>
+    <WalletContext.Provider value={useState<WalletConnection>({isEmulator: false})}>
       {props.children}
     </WalletContext.Provider>
   );
