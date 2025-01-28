@@ -1,6 +1,12 @@
-import { Button } from "@/components/ui/button";
 import React from "react";
+import { AdminClient } from "./client";
 
-export default function Page() {
-  return <Button>Mint Identification Token</Button>;
-}
+const Adminpage = () => {
+  return (
+    <div>
+      <AdminClient />
+    </div>
+  );
+};
+
+export default Adminpage;
