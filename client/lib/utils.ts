@@ -1,5 +1,7 @@
-import { NETWORK, PROVIDER } from "@/config";
+import { IdetificationPID, NETWORK, PROVIDER } from "@/config";
 import {
+  fromText,
+  LucidEvolution,
   makeWalletFromPrivateKey,
   MintingPolicy,
   mintingPolicyToId,
@@ -72,4 +74,11 @@ export async function privateKeytoAddress(privateKey: string) {
     privateKey
   ).address();
   return privateeyAddress;
+}
+
+export async function FindRefUtxo(lucid: LucidEvolution, address: string) {
+  const asset = fromText("ConfigNFT");
+  const token = `${IdetificationPID}${asset}`;
+  const UtoAsset = await lucid.utxosAtWithUnit(address, token);
+  return UtoAsset;
 }

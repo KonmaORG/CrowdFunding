@@ -12,7 +12,7 @@ export type Wallet = {
 
 //#region Alias
 export const PaymentKeyHashSchema = Data.Bytes();
-export const StakeKeyHashSchema = Data.Nullable(Data.Bytes());
+export const StakeKeyHashSchema = Data.Bytes();
 
 export const AddressSchema = Data.Tuple([
   PaymentKeyHashSchema,
