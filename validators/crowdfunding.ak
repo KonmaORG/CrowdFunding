@@ -30,7 +30,7 @@ validator campaign(
       campaign_datum,
       nonce,
       creator,
-      utils.address_from_tuple(state_token_script),
+      utils.script_address_from_tuple(state_token_script),
     )
   }
 

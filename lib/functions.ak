@@ -26,7 +26,9 @@ pub fn validate_create_campaign(
   } = campaign_datum
   expect creator == pkh
   expect goal > 0
-  expect unwrap.finite_start_of(tx.validity_range) < deadline
+  expect  unwrap.finite_start_of(tx.validity_range) < deadline
+  trace@"dead": deadline
+  trace @"validity": unwrap.finite_start_of(tx.validity_range) 
   and {
     utils.milestone_status(milestone),
     utils.must_consume_creator_nonce(tx, creator, nonce)?,
