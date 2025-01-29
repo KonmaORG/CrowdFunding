@@ -6,7 +6,7 @@ use crowdfunding/types.{
    StakeKeyHash,
 }
 
-pub fn address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
+pub fn script_address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
   let (pkh, skh) = key_hash_tuple
   Address {
     payment_credential: pkh |> Script,
