@@ -13,6 +13,20 @@ use crowdfunding/types.{
 }
 use test_kit/time/unwrap
 
+pub fn script_address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
+  let (pkh, skh) = key_hash_tuple
+  Address {
+    payment_credential: pkh |> Script,
+    stake_credential: if skh == "" {
+      None
+    } else {
+      skh |> Script |> Inline |> Some
+    },
+  }
+}
+
+
+
 pub fn address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
   let (pkh, skh) = key_hash_tuple
   Address {
@@ -67,23 +81,39 @@ pub fn must_send_state_reward_token(
 
     when datum is {
       // STATE token to state_token addr or self_script if state is not running
-      InlineDatum(output_datum) -> and {
-          if with_datum.state == Initiated {
-            address == state_token_address
-          } else {
-            address == self_address
+      InlineDatum(output_datum) -> {
+        trace @"address":  address
+        
+        trace @"state token addres": address == state_token_address
+        trace @"state_token_address" : state_token_address
+
+        or {
+          and {
+            trace @"11111111111111111111"
+            assets.quantity_of(value, self_script, config.state_token) == 1,
+            if with_datum.state == Initiated {
+              address == state_token_address
+            } else {
+              address == self_address
+            },
+            output_datum == with_datum_data,
           },
-          output_datum == with_datum_data,
-          assets.quantity_of(value, self_script, config.state_token) == 1,
+          and {
+            trace @"2222222222222222222"
+
+            address == self_address,
+            assets.quantity_of(value, self_script, with_datum.name) == with_datum.fraction,
+            output_datum == with_datum_data,
+          },
         }
+      }
 
       // REWARD token to self script addr
-      _ -> and {
-          address == self_address,
-          assets.quantity_of(value, self_script, with_datum.name) == with_datum.fraction,
-        }
+      _ -> False
     }
   }
+
+  trace @"counter": counter
   counter == 2
 }
 
