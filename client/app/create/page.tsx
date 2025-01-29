@@ -1,5 +1,10 @@
 import React from "react";
+import { CampaignClient } from "./client";
 
 export default function Page() {
-  return <div>P</div>;
+  return (
+    <div>
+      <CampaignClient />
+    </div>
+  );
 }

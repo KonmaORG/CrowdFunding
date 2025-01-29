@@ -1,12 +1,26 @@
-import { IdetificationPID } from "@/config";
-import { CrowdfundingValidator } from "@/config/scripts/scripts";
-import { WalletConnection } from "@/context/walletContext";
+import { IdetificationPID, NETWORK } from "@/config";
+import {
+  CrowdfundingValidator,
+  StateTokenValidator,
+} from "@/config/scripts/scripts";
+import { FindRefUtxo, getAddress, submit } from "@/lib/utils";
 import { CampaignDatum } from "@/types/cardano";
-import { Constr, paymentCredentialOf } from "@lucid-evolution/lucid";
+import {
+  Constr,
+  fromText,
+  LucidEvolution,
+  mintingPolicyToId,
+  paymentCredentialOf,
+  Data,
+  validatorToAddress,
+} from "@lucid-evolution/lucid";
 
-export async function CreateCampaign(walletConnection: WalletConnection) {
-  const { lucid, address } = walletConnection;
-  if (!address || !lucid) throw Error("Uninitialized Lucid!!!");
+export async function CreateCampaign(
+  lucid: LucidEvolution,
+  address: string,
+  campaign: CampaignDatum
+) {
+  if (!lucid) throw Error("Uninitialized Lucid!!!");
   let utxo = await lucid.utxosAt(address);
   const { txHash, outputIndex } = utxo[0];
   const oref = new Constr(0, [String(txHash), BigInt(outputIndex)]);
@@ -16,20 +30,44 @@ export async function CreateCampaign(walletConnection: WalletConnection) {
     oref,
     IdetificationPID,
   ]);
+  const PID = mintingPolicyToId(Campaign_Validator);
+  const state = fromText("STATE_TOKEN");
+  const stateToken = { [`${PID}${state}`]: 1n };
 
-  //   const datum: CampaignDatum = {
-  //     name: "First",
-  //     goal:100n,
-  //     deadline:
+  const reward = campaign.name;
+  const reward_fraction = campaign.fraction;
+  const rewardToken = { [`${PID}${reward}`]: reward_fraction };
 
-  //   };
+  const state_addr = getAddress(StateTokenValidator);
+  const script_addr = validatorToAddress(NETWORK, Campaign_Validator);
 
-  //  name: Data.Bytes(),
-  //   goal: Data.Integer(),
-  //   deadline: Data.Integer(),
-  //   creator: AddressSchema,
-  //   milestone: MilestoneArray,
-  //   state: CampaignStateSchema,
-  //   fraction: Data.Integer(),
-  // }
+  const ref_utxo = await FindRefUtxo(lucid, state_addr);
+  console.log(Data.to(campaign, CampaignDatum));
+  console.log(campaign.deadline, campaign.goal, campaign.creator);
+  const date = Math.floor(Date.now() / 1000);
+  const tx = await lucid
+    .newTx()
+    .collectFrom([utxo[0]])
+    .readFrom(ref_utxo)
+    .mintAssets(
+      { ...stateToken, ...rewardToken },
+      Data.to(campaign, CampaignDatum)
+    )
+    .validFrom(date)
+    .pay.ToContract(
+      state_addr,
+      { kind: "inline", value: Data.to(campaign, CampaignDatum) },
+      { lovelace: 2_000_000n, ...stateToken }
+    )
+    .pay.ToContract(
+      script_addr,
+      { kind: "inline", value: Data.to(campaign, CampaignDatum) },
+      { lovelace: 2_000_000n, ...rewardToken }
+    )
+    .attach.MintingPolicy(Campaign_Validator)
+    .complete();
+
+  submit(tx);
 }
+
+/// TODO see ariady code for Date.now(deadeline)

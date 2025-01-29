@@ -70,7 +70,7 @@ export async function sendconfig(walletConnection: WalletConnection) {
   };
   const datum: ConfigDatum = {
     multisig,
-    state_token_script: [paymentCredentialOf(state_token_addr).hash, null],
+    state_token_script: [paymentCredentialOf(state_token_addr).hash, ""],
     platform: paymentCredentialOf(PLATFORMADDR).hash,
   };
   console.log(datum);
