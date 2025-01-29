@@ -1,22 +1,26 @@
-import { IdetificationPID, NETWORK, PLATFORMADDR } from "@/config";
+import {
+  IdetificationPID,
+  NETWORK,
+  PLATFORMADDR,
+  SIGNER1,
+  SIGNER2,
+  SIGNER3,
+} from "@/config";
 import {
   IdentificationNFTValidator,
   StateTokenValidator,
 } from "@/config/scripts/scripts";
 import { WalletConnection } from "@/context/walletContext";
 import { privateKeytoAddress, submit } from "@/lib/utils";
-import { AddressSchema, ConfigDatum, Multisig } from "@/types/cardano";
+import { ConfigDatum, Multisig } from "@/types/cardano";
 import {
   Constr,
   Data,
   fromText,
   mintingPolicyToId,
   validatorToAddress,
-  Validator,
   paymentCredentialOf,
-  Null,
 } from "@lucid-evolution/lucid";
-import { Config } from "tailwind-merge";
 
 export async function Identification_NFT_Mint(
   walletConnection: WalletConnection
@@ -26,8 +30,7 @@ export async function Identification_NFT_Mint(
   if (!address || !lucid) throw Error("Uninitialized Lucid!!!");
   let utxo = await lucid.utxosAt(address);
   const { txHash, outputIndex } = utxo[0];
-  // let hash = utxo[0]["txHash"];
-  // let id = utxo[0].outputIndex;
+
   const oref = new Constr(0, [String(txHash), BigInt(outputIndex)]);
 
   const Identification_NFT_Mint_val = IdentificationNFTValidator([oref]);
@@ -56,17 +59,13 @@ export async function sendconfig(walletConnection: WalletConnection) {
   const state_token_addr = validatorToAddress(NETWORK, StateTokenValidator());
   const asset = fromText("ConfigNFT");
   const token = { [`${IdetificationPID}${asset}`]: 1n };
-  console.log("123");
-  let signer1 = process.env.NEXT_PUBLIC_SIGNER_1 as string;
-  let signer2 = process.env.NEXT_PUBLIC_SIGNER_2 as string;
-  let signer3 = process.env.NEXT_PUBLIC_SIGNER_3 as string;
 
   const multisig: Multisig = {
     required: 2n,
     signers: [
-      paymentCredentialOf(await privateKeytoAddress(signer1)).hash,
-      paymentCredentialOf(await privateKeytoAddress(signer2)).hash,
-      paymentCredentialOf(await privateKeytoAddress(signer3)).hash,
+      paymentCredentialOf(await privateKeytoAddress(SIGNER1)).hash,
+      paymentCredentialOf(await privateKeytoAddress(SIGNER2)).hash,
+      paymentCredentialOf(await privateKeytoAddress(SIGNER3)).hash,
     ],
   };
   const datum: ConfigDatum = {
