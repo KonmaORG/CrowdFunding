@@ -5,10 +5,6 @@ import {
   Provider,
   validatorToAddress,
 } from "@lucid-evolution/lucid";
-import {
-  IdentificationNFTValidator,
-  StateTokenValidator,
-} from "./scripts/scripts";
 
 export const BF_URL = process.env.NEXT_PUBLIC_BF_URL!;
 export const BF_PID = process.env.NEXT_PUBLIC_BF_PID!;
@@ -22,3 +18,7 @@ export const IdetificationPID =
 
 export const PLATFORMADDR =
   "addr1qxu75psqc5c234da4tpzuqymmru6reqlaulq25k8ecqc53krhru8dgujmceyjamw6m636jzcdv834nkgll2nlpuyak6s2vnyff";
+
+export const SIGNER1 = process.env.NEXT_PUBLIC_SIGNER_1 as string;
+export const SIGNER2 = process.env.NEXT_PUBLIC_SIGNER_2 as string;
+export const SIGNER3 = process.env.NEXT_PUBLIC_SIGNER_3 as string;
