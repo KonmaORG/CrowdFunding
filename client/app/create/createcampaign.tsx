@@ -48,8 +48,8 @@ export default function CreateCampaignPage() {
     const deadline = BigInt(campaignDeadline.toDate().getTime());
     const datum: CampaignDatum = {
       name: fromText(campaignName),
-      deadline: deadline,
       goal: BigInt(campaignGoal),
+      deadline: deadline,
       creator: [
         paymentCredentialOf(address).hash,
         stakeCredentialOf(address).hash,

@@ -63,9 +63,13 @@ export function getPolicyId(validatorFucntion: { (): Validator; (): Script }) {
 export async function submit(tx: TxSignBuilder) {
   try {
     const sign = await tx.sign.withWallet().complete();
+    console.log("signed")
     const txHash = await sign.submit();
+    console.log("submitted")
     console.log("tx", txHash);
-  } catch (e) {
+  } catch (e: any) {
+    console.log("error",e);
+    console.log("error",JSON.stringify(e));
     throw e;
   }
 }
@@ -88,8 +92,8 @@ export async function FindRefUtxo(lucid: LucidEvolution, address: string) {
 
 export async function datumDecoder(lucid: LucidEvolution, utxo: UTxO) {
   const data = await lucid.datumOf(utxo)
+  console.log(data, utxo.datum)
   const datum = Data.castFrom(data, CampaignDatum)
-
   return datum
 }
 

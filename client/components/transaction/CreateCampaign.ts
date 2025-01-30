@@ -56,7 +56,6 @@ export async function CreateCampaign(
       { ...stateToken, ...rewardToken },
       Data.to(campaign, CampaignDatum)
     )
-    .validTo(date)
     .pay.ToContract(
       state_addr,
       { kind: "inline", value: Data.to(campaign, CampaignDatum) },
@@ -76,7 +75,8 @@ export async function CreateCampaign(
       },
     })
     .attach.MintingPolicy(Campaign_Validator)
-    .complete();
+    .validTo(date)
+    .complete({canonical: false});
 
   submit(tx);
   console.log("Campaign name", toText(campaign.name));
