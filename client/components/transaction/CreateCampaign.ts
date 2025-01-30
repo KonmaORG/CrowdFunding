@@ -42,8 +42,8 @@ export async function CreateCampaign(
   const script_addr = validatorToAddress(NETWORK, Campaign_Validator);
 
   const ref_utxo = await FindRefUtxo(lucid, state_addr);
-  console.log(Data.to(campaign, CampaignDatum));
-  console.log(campaign.deadline, campaign.goal, campaign.creator);
+  // console.log(Data.to(campaign, CampaignDatum));
+  // console.log(campaign.deadline, campaign.goal, campaign.creator);
   const date = Math.floor(Number(campaign.deadline));
   console.log(date);
   const tx = await lucid
@@ -69,6 +69,12 @@ export async function CreateCampaign(
     .complete();
 
   submit(tx);
+  console.log("Campaign name", campaign.name);
+  console.log("Campaign Goal", campaign.goal);
+  console.log(
+    "Campaign Deadline:",
+    new Date(Number(campaign.deadline)).toLocaleString()
+  );
 }
 
 /// TODO see ariady code for Date.now(deadeline)

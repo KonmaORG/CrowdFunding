@@ -49,6 +49,7 @@ export async function Identification_NFT_Mint(
 
   submit(tx);
   console.log("PID", minting_script);
+  console.log("TOKEN", asset);
 }
 
 export async function sendconfig(walletConnection: WalletConnection) {
@@ -87,4 +88,5 @@ export async function sendconfig(walletConnection: WalletConnection) {
     .complete();
 
   submit(tx);
+  console.log("TOKEN", asset);
 }
