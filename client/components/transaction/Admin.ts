@@ -58,6 +58,7 @@ export async function sendconfig(walletConnection: WalletConnection) {
   if (!address || !lucid) throw Error("Uninitialized Lucid!!!");
 
   const state_token_addr = validatorToAddress(NETWORK, StateTokenValidator());
+
   const asset = fromText("ConfigNFT");
   const token = { [`${IdetificationPID}${asset}`]: 1n };
 
