@@ -107,3 +107,12 @@ export const CampaignActionRedeemer = {
   Refund: Data.to(new Constr(3, [])),
   Release: Data.to(new Constr(4, [])),
 };
+
+
+
+export type MetadataType = {
+  name: string
+  image: string
+  mediaType?: string
+  description?: string
+}

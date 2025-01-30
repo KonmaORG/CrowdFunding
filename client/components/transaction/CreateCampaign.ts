@@ -13,6 +13,7 @@ import {
   paymentCredentialOf,
   Data,
   validatorToAddress,
+  toText,
 } from "@lucid-evolution/lucid";
 
 export async function CreateCampaign(
@@ -68,7 +69,7 @@ export async function CreateCampaign(
     )
     .attachMetadata(721, {
       [PID]: {
-        [campaign.name]: {
+        [toText(campaign.name)]: {
           name: campaign.name,
           image: "https://avatars.githubusercontent.com/u/106166350",
         },
@@ -78,7 +79,7 @@ export async function CreateCampaign(
     .complete();
 
   submit(tx);
-  console.log("Campaign name", campaign.name);
+  console.log("Campaign name", toText(campaign.name));
   console.log("Campaign Goal", campaign.goal);
   console.log(
     "Campaign Deadline:",

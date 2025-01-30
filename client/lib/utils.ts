@@ -1,5 +1,7 @@
-import { IdetificationPID, NETWORK, PROVIDER } from "@/config";
+import { BF_PID, BF_URL, IdetificationPID, NETWORK, PROVIDER } from "@/config";
+import { CampaignDatum } from "@/types/cardano";
 import {
+  Data,
   fromText,
   LucidEvolution,
   makeWalletFromPrivateKey,
@@ -7,6 +9,7 @@ import {
   mintingPolicyToId,
   Script,
   TxSignBuilder,
+  UTxO,
   Validator,
   validatorToAddress,
 } from "@lucid-evolution/lucid";
@@ -81,4 +84,36 @@ export async function FindRefUtxo(lucid: LucidEvolution, address: string) {
   const token = `${IdetificationPID}${asset}`;
   const UtoAsset = await lucid.utxosAtWithUnit(address, token);
   return UtoAsset;
+}
+
+export async function datumDecoder(lucid: LucidEvolution, utxo: UTxO) {
+  const data = await lucid.datumOf(utxo)
+  const datum = Data.castFrom(data, CampaignDatum)
+
+  return datum
+}
+
+
+export const blockfrost = {
+  getMetadata: async (asset: string) => {
+    const url = `${BF_URL}/assets/${asset}`
+
+    try {
+      const assetResponse = await fetch(url, {
+        method: 'GET',
+        headers: {
+          project_id: BF_PID,
+        },
+      })
+
+      if (!assetResponse.ok) {
+        throw new Error(`Error: ${assetResponse.statusText}`)
+      }
+
+      const result = await assetResponse.json()
+      return result.onchain_metadata
+    } catch (err: any) {
+      return err.message
+    }
+  },
 }

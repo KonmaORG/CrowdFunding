@@ -20,9 +20,11 @@ import React, { useCallback, useState } from "react";
 import { useWallet } from "@/context/walletContext";
 import { CampaignDatum } from "@/types/cardano";
 import {
+  fromHex,
   fromText,
   paymentCredentialOf,
   stakeCredentialOf,
+  toText,
 } from "@lucid-evolution/lucid";
 import { CreateCampaign } from "@/components/transaction/CreateCampaign";
 
