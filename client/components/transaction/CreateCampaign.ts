@@ -46,6 +46,7 @@ export async function CreateCampaign(
   // console.log(campaign.deadline, campaign.goal, campaign.creator);
   const date = Math.floor(Number(campaign.deadline));
   console.log(date);
+  console.log("adddr", state_addr);
   const tx = await lucid
     .newTx()
     .collectFrom([utxo[0]])
@@ -65,6 +66,14 @@ export async function CreateCampaign(
       { kind: "inline", value: Data.to(campaign, CampaignDatum) },
       { lovelace: 2_000_000n, ...rewardToken }
     )
+    .attachMetadata(721, {
+      [PID]: {
+        [campaign.name]: {
+          name: campaign.name,
+          image: "https://avatars.githubusercontent.com/u/106166350",
+        },
+      },
+    })
     .attach.MintingPolicy(Campaign_Validator)
     .complete();
 
