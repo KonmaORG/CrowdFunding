@@ -1,10 +1,12 @@
 use aiken/collection/dict
 use aiken/collection/list
 use aiken/crypto.{VerificationKeyHash}
+use aiken/interval.{Finite}
 use cardano/address.{Address, Inline, Script, VerificationKey}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{
-  InlineDatum, Input, Output, OutputReference, Transaction, find_input,
+  InlineDatum, Input, Output, OutputReference, Transaction, ValidityRange,
+  find_input,
 }
 use config
 use crowdfunding/types.{
@@ -24,8 +26,6 @@ pub fn script_address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash))
     },
   }
 }
-
-
 
 pub fn address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
   let (pkh, skh) = key_hash_tuple
@@ -82,10 +82,9 @@ pub fn must_send_state_reward_token(
     when datum is {
       // STATE token to state_token addr or self_script if state is not running
       InlineDatum(output_datum) -> {
-        trace @"address":  address
-        
+        trace @"address": address
         trace @"state token addres": address == state_token_address
-        trace @"state_token_address" : state_token_address
+        trace @"state_token_address": state_token_address
 
         or {
           and {
@@ -332,6 +331,13 @@ pub fn must_send_state_token(
         value == self_input.output.value,
       }
 
+    _ -> False
+  }
+}
+
+pub fn must_happen_before(range: ValidityRange, lock_expiration_time: Int) {
+  when range.upper_bound.bound_type is {
+    Finite(tx_latest_time) -> (lock_expiration_time >= tx_latest_time)?
     _ -> False
   }
 }

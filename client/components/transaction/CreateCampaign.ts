@@ -44,7 +44,8 @@ export async function CreateCampaign(
   const ref_utxo = await FindRefUtxo(lucid, state_addr);
   console.log(Data.to(campaign, CampaignDatum));
   console.log(campaign.deadline, campaign.goal, campaign.creator);
-  const date = Math.floor(Date.now() / 1000);
+  const date = Math.floor(Number(campaign.deadline));
+  console.log(date);
   const tx = await lucid
     .newTx()
     .collectFrom([utxo[0]])
@@ -53,7 +54,7 @@ export async function CreateCampaign(
       { ...stateToken, ...rewardToken },
       Data.to(campaign, CampaignDatum)
     )
-    .validFrom(date)
+    .validTo(date)
     .pay.ToContract(
       state_addr,
       { kind: "inline", value: Data.to(campaign, CampaignDatum) },
