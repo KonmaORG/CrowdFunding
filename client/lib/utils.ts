@@ -97,6 +97,14 @@ export async function datumDecoder(lucid: LucidEvolution, utxo: UTxO) {
   return datum;
 }
 
+export function toAda(value: BigInt) {
+  return Number(value) / 1_000_000;
+}
+export function toLovelace(value: number) {
+  return BigInt(value * 1_000_000);
+}
+
+
 export const blockfrost = {
   getMetadata: async (asset: string) => {
     const url = `${BF_URL}/assets/${asset}`;
