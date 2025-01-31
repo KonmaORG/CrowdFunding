@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@heroui/date-picker";
-import { Input } from "@heroui/input";
+import { Input, Textarea } from "@heroui/input";
 import {
   Modal,
   ModalBody,
@@ -16,18 +16,18 @@ import {
   getLocalTimeZone,
   ZonedDateTime,
 } from "@internationalized/date";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useWallet } from "@/context/walletContext";
 import { CampaignDatum } from "@/types/cardano";
 import {
-  fromHex,
   fromText,
   paymentCredentialOf,
   stakeCredentialOf,
-  toText,
 } from "@lucid-evolution/lucid";
 import { CreateCampaign } from "@/components/transaction/CreateCampaign";
 import { toLovelace } from "@/lib/utils";
+import { Switch } from "@heroui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function CreateCampaignPage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -38,6 +38,10 @@ export default function CreateCampaignPage() {
   const timeNow = fromAbsolute(Date.now(), timezone);
   const [campaignDeadline, setCampaignDeadline] =
     useState<ZonedDateTime | null>(timeNow);
+  const [fractions, setFractions] = useState<number>(0);
+  const [description, setDescription] = useState<string>("");
+  const [isMilestone, setIsMilestone] = useState<boolean>(false);
+  const [numberOfMilestones, setNumberOfMilestones] = useState<number>(1);
 
   const [WalletConnection] = useWallet();
   const { address, lucid } = WalletConnection;
@@ -55,13 +59,18 @@ export default function CreateCampaignPage() {
         paymentCredentialOf(address).hash,
         stakeCredentialOf(address).hash,
       ],
-      milestone: [false, false],
+      milestone:  new Array(numberOfMilestones).fill(false),
       state: "Initiated",
-      fraction: 2n,
+      fraction: BigInt(fractions),
     };
-    await CreateCampaign(lucid, address, datum, "campaign deatuils and descriptions");
+    await CreateCampaign(
+      lucid,
+      address,
+      datum,
+      description,
+    );
     setIsSubmittingTx(false);
-  }, [campaignName, campaignGoal, campaignDeadline]);
+  }, [campaignName, campaignGoal, campaignDeadline, fractions, description, numberOfMilestones]);
 
   return (
     <>
@@ -127,6 +136,58 @@ export default function CreateCampaignPage() {
                   minValue={timeNow}
                   onChange={setCampaignDeadline}
                 />
+
+                {/* Fractions */}
+                <div className="space-y-2">
+                  <Input
+                  label="Fractions"
+                    id="fractions"
+                    type="number"
+                    value={fractions.toString()}
+                    onChange={(e) => {setFractions(Number(e.target.value))}}
+                    placeholder="Enter number of fractions"
+                  />
+                </div>
+
+               
+                {/* Description */}
+                <div className="space-y-2">
+                  <Textarea
+                  label="Campaign description"
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter description"
+                    rows={4}
+                  />
+                </div>
+
+
+                 {/* Milestones */}
+                 <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={isMilestone}
+                      onChange={(e) => setIsMilestone(e.target.checked)}
+                    />
+                    <Label htmlFor="milestone">Milestone</Label>
+                  </div>
+
+                  
+                      <Input
+                        id="numberOfMilestones"
+                        type="number"
+                        value={numberOfMilestones.toString()}
+                        onChange={(e) =>
+                          {setNumberOfMilestones(Number(e.target.value))
+                          console.log(numberOfMilestones, "changed")
+                        }}
+                        placeholder="Enter number"
+                        className={`w-full ${isMilestone ? "" : "invisible"}`}
+                      />
+                
+                </div>
+
               </ModalBody>
               <ModalFooter>
                 {/* Cancel Button */}
@@ -135,7 +196,7 @@ export default function CreateCampaignPage() {
                     color="danger"
                     // isDisabled={isSubmittingTx}
                     // variant="flat"
-                    onClick={onClose}
+                    onClick={() => {onClose(); setIsSubmittingTx(false);}}
                   >
                     Cancel
                   </Button>
