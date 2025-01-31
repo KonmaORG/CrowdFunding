@@ -11,37 +11,54 @@ export default function HomePage() {
   const [walletConnection] = useWallet();
   const { lucid } = walletConnection;
   const [projects, setProjects] = useState<UTxO[]>([]);
-
+  const [balance, setBalance] = useState<
+  { unit: string; quantity: number}[]
+>([])
   useEffect(() => {
     if (!lucid) return;
-    const fetchUtxos = async () => {
-      const state_addr = getAddress(StateTokenValidator);
+    // const fetchUtxos = async () => {
+    //   const state_addr = getAddress(StateTokenValidator);
 
-      const utxos = await lucid.utxosAt(state_addr);
-      const filteredUtxos = utxos.filter((utxo) => {
-        const assets = utxo.assets;
-        return Object.keys(assets).some((key) =>
-          key.startsWith(IdetificationPID)
-        );
-      });
+    //   const utxos = await lucid.utxosAt(state_addr);
+    //   const filteredUtxos = utxos.filter((utxo) => {
+    //     const assets = utxo.assets;
+    //     return Object.keys(assets).some((key) =>
+    //       key.startsWith(IdetificationPID)
+    //     );
+    //   });
 
-      setProjects(utxos);
-    };
-    fetchUtxos();
+    //   setProjects(utxos);
+    // };
+    // fetchUtxos();
+    async function fetchutxos() {
+            if (!lucid) return;
+              const state_addr = getAddress(StateTokenValidator);
+          const utxos = await lucid.utxosAt(state_addr);
+        
+          utxos.map(async (utxo) => {
+            
+        
+            Object.entries(utxo.assets).map(([assetKey, quantity]) => {
+              if (!assetKey.startsWith(IdetificationPID) && !assetKey.startsWith('lovelace')) { 
+                console.log(assetKey, quantity);
+                setBalance((prev) => [
+                  ...prev,
+                  { unit: assetKey, quantity: Number(quantity) },
+                ]);
+              }
+            });
+          });
+        }
+        fetchutxos();
   }, [lucid]);
 
   return (
     <div>
-      {projects.length > 0 ? (
+      {balance.length > 0 ? (
         <ul>
-          {projects.map((utxo, index) => (
+          {balance.map((utxo, index) => (
             <li key={index}>
-              <strong>Tx Hash:</strong> {utxo.txHash} <br />
-              <strong>Index:</strong> {utxo.outputIndex} <br />
-              <strong>Assets:</strong>{" "}
-              {JSON.stringify(utxo.assets, (_, value) =>
-                typeof value === "bigint" ? value.toString() : value
-              )}
+             {utxo.unit} : {utxo.quantity}
             </li>
           ))}
           <br />

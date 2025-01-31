@@ -113,6 +113,6 @@ export const CampaignActionRedeemer = {
 export type MetadataType = {
   name: string
   image: string
-  mediaType?: string
+  campaignName?: string
   description?: string
 }

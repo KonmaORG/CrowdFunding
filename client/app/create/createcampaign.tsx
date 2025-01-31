@@ -58,7 +58,7 @@ export default function CreateCampaignPage() {
       state: "Initiated",
       fraction: 2n,
     };
-    await CreateCampaign(lucid, address, datum);
+    await CreateCampaign(lucid, address, datum, "campaign deatuils and descriptions");
     setIsSubmittingTx(false);
   }, [campaignName, campaignGoal, campaignDeadline]);
 

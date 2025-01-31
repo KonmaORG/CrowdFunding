@@ -38,10 +38,11 @@ export default function HomePage() {
       const utxos = await lucid.utxosAt(state_addr);
     
       utxos.map(async (utxo) => {
-        const datum = await datumDecoder(lucid, utxo);
-    
-        Object.entries(utxo.assets).map(([assetKey, quantity]) => {
-          if (!assetKey.startsWith(IdetificationPID)) { 
+        
+        Object.entries(utxo.assets).map(async ([assetKey, quantity]) => {
+          if (!assetKey.startsWith(IdetificationPID) && !assetKey.startsWith('lovelace')) {             
+            const datum = await datumDecoder(lucid, utxo);
+            console.log("worked")
             setBalance((prev) => [
               ...prev,
               { unit: assetKey, quantity: Number(quantity), datum: datum },
@@ -56,9 +57,9 @@ export default function HomePage() {
   return (
     <div className='flex gap-4 flex-wrap'>
     {balance &&
-      balance.map((token) => (
+      balance.map((token, index) => (
         <TokenCard
-          key={token.unit}
+          key={index}
           datum={token.datum}
           qty={token.quantity}
           token={token.unit}

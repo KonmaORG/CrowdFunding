@@ -93,7 +93,6 @@ export async function FindRefUtxo(lucid: LucidEvolution, address: string) {
 
 export async function datumDecoder(lucid: LucidEvolution, utxo: UTxO) {
   const data = await lucid.datumOf(utxo);
-  console.log(data, utxo.datum);
   const datum = Data.castFrom(data, CampaignDatum);
   return datum;
 }

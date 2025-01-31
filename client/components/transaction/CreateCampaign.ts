@@ -19,7 +19,8 @@ import {
 export async function CreateCampaign(
   lucid: LucidEvolution,
   address: string,
-  campaign: CampaignDatum
+  campaign: CampaignDatum,
+  description: string,
 ) {
   if (!lucid) throw Error("Uninitialized Lucid!!!");
   let utxo = await lucid.utxosAt(address);
@@ -70,9 +71,17 @@ export async function CreateCampaign(
     )
     .attachMetadata(721, {
       [PID]: {
-        [toText(campaign.name)]: {
-          name: campaign.name,
+        ["STATE_TOKEN"]: {
+          name: "STATE_TOKEN",
+          campaignName: toText(campaign.name),
           image: "https://avatars.githubusercontent.com/u/106166350",
+          description: description,
+        },
+        [toText(campaign.name)]: {
+          name: toText(campaign.name),
+          campaignName: toText(campaign.name),
+          image: "https://avatars.githubusercontent.com/u/106166350",
+          description: description,
         },
       },
     })
