@@ -27,6 +27,7 @@ import {
   toText,
 } from "@lucid-evolution/lucid";
 import { CreateCampaign } from "@/components/transaction/CreateCampaign";
+import { toLovelace } from "@/lib/utils";
 
 export default function CreateCampaignPage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -48,7 +49,7 @@ export default function CreateCampaignPage() {
     const deadline = BigInt(campaignDeadline.toDate().getTime());
     const datum: CampaignDatum = {
       name: fromText(campaignName),
-      goal: BigInt(campaignGoal),
+      goal: toLovelace(+campaignGoal),
       deadline: deadline,
       creator: [
         paymentCredentialOf(address).hash,

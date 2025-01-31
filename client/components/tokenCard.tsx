@@ -5,7 +5,7 @@ import Image from "next/image"
 import { SquareArrowOutUpRight } from "lucide-react"
 import Link from "next/link"
 
-import { blockfrost } from "@/lib/utils"
+import { blockfrost, toAda } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { NETWORK } from "@/config"
@@ -56,10 +56,7 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
         <CardContent className="flex justify-center p-1 relative">
           <Image alt="token image" className="rounded-md object-cover" height={200} src={imageUrl || ""} width={200} />
           <div className='absolute left-2 bottom-2 rounded-full  bg-primary text-primary-foreground px-1.5 py-1 text-xs'>
-            Goal: {datum.goal}
-          </div>
-          <div className='absolute right-2 bottom-2 rounded-full  bg-primary text-primary-foreground px-1.5 py-1 text-xs'>
-            Remaining: {datum.goal}
+            Goal: {toAda(datum.goal)}
           </div>
         </CardContent>
         <CardFooter className="flex items-center justify-between space-x-2 p-2">

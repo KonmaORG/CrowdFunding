@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { toAda } from "@/lib/utils"
 
 interface CampaignModalProps {
   isOpen: boolean
@@ -36,7 +37,7 @@ export function CampaignModal({ isOpen, onClose, datum }: CampaignModalProps) {
     setSupportAmount(value)
 
     const amount = Number.parseFloat(value)
-    const minAmount = datum.goal / datum.fraction
+    const minAmount = toAda(datum.goal) / Number(datum.fraction)
 
     if (amount % Number(minAmount) !== 0) {
       setError(`Amount must be a multiple of ${minAmount}`)
@@ -46,8 +47,8 @@ export function CampaignModal({ isOpen, onClose, datum }: CampaignModalProps) {
   }
 
   const getPredefinedAmounts = () => {
-    const baseAmount = datum.goal / datum.fraction
-    return [1, 2, 3, 4, 5].map((multiplier) => Number(baseAmount) * multiplier)
+    const baseAmount = toAda(datum.goal) / Number(datum.fraction)
+    return [1, 2, 3, 4, 5].map((multiplier) => (Number(baseAmount) * multiplier).toFixed(2))
   }
 
   return (
@@ -56,7 +57,7 @@ export function CampaignModal({ isOpen, onClose, datum }: CampaignModalProps) {
         <DialogHeader>
           <DialogTitle>Support Campaign</DialogTitle>
           <DialogDescription>
-            Enter the amount you want to support. Minimum amount: {datum.goal / datum.fraction}
+            Enter the amount you want to support. Minimum amount: {toAda(datum.goal) / Number(datum.fraction)}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
