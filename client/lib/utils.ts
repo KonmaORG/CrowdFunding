@@ -15,6 +15,7 @@ import {
 } from "@lucid-evolution/lucid";
 import { Validation } from "@react-types/shared";
 import { clsx, type ClassValue } from "clsx";
+import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -63,13 +64,13 @@ export function getPolicyId(validatorFucntion: { (): Validator; (): Script }) {
 export async function submit(tx: TxSignBuilder) {
   try {
     const sign = await tx.sign.withWallet().complete();
-    console.log("signed")
+    console.log("signed");
     const txHash = await sign.submit();
-    console.log("submitted")
+    console.log("submitted");
     console.log("tx", txHash);
   } catch (e: any) {
-    console.log("error",e);
-    console.log("error",JSON.stringify(e));
+    console.log("error", e);
+    console.log("error", JSON.stringify(e));
     throw e;
   }
 }
@@ -91,33 +92,54 @@ export async function FindRefUtxo(lucid: LucidEvolution, address: string) {
 }
 
 export async function datumDecoder(lucid: LucidEvolution, utxo: UTxO) {
-  const data = await lucid.datumOf(utxo)
-  console.log(data, utxo.datum)
-  const datum = Data.castFrom(data, CampaignDatum)
-  return datum
+  const data = await lucid.datumOf(utxo);
+  console.log(data, utxo.datum);
+  const datum = Data.castFrom(data, CampaignDatum);
+  return datum;
 }
-
 
 export const blockfrost = {
   getMetadata: async (asset: string) => {
-    const url = `${BF_URL}/assets/${asset}`
+    const url = `${BF_URL}/assets/${asset}`;
 
     try {
       const assetResponse = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
           project_id: BF_PID,
         },
-      })
+      });
 
       if (!assetResponse.ok) {
-        throw new Error(`Error: ${assetResponse.statusText}`)
+        throw new Error(`Error: ${assetResponse.statusText}`);
       }
 
-      const result = await assetResponse.json()
-      return result.onchain_metadata
+      const result = await assetResponse.json();
+      return result.onchain_metadata;
     } catch (err: any) {
-      return err.message
+      return err.message;
     }
   },
-}
+
+  getLatestTime: async () => {
+    const url = `${BF_URL}/blocks/latest`;
+
+    try {
+      const assetResponse = await fetch(url, {
+        method: "GET",
+        headers: {
+          project_id: BF_PID,
+        },
+      });
+
+      if (!assetResponse.ok) {
+        throw new Error(`Error: ${assetResponse.statusText}`);
+      }
+
+      const result = await assetResponse.json();
+      return result.time * 1000;
+    } catch (err: any) {
+      return err.message;
+    }
+  },
+};

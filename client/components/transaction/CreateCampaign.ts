@@ -3,7 +3,7 @@ import {
   CrowdfundingValidator,
   StateTokenValidator,
 } from "@/config/scripts/scripts";
-import { FindRefUtxo, getAddress, submit } from "@/lib/utils";
+import { blockfrost, FindRefUtxo, getAddress, submit } from "@/lib/utils";
 import { CampaignDatum } from "@/types/cardano";
 import {
   Constr,
@@ -43,9 +43,11 @@ export async function CreateCampaign(
   const script_addr = validatorToAddress(NETWORK, Campaign_Validator);
 
   const ref_utxo = await FindRefUtxo(lucid, state_addr);
+
   // console.log(Data.to(campaign, CampaignDatum));
   // console.log(campaign.deadline, campaign.goal, campaign.creator);
-  const date = Math.floor(Number(campaign.deadline));
+  // const date1 = Math.floor(Number(campaign.deadline));
+  const date = await blockfrost.getLatestTime();
   console.log(date);
   console.log("adddr", state_addr);
   const tx = await lucid
@@ -75,8 +77,8 @@ export async function CreateCampaign(
       },
     })
     .attach.MintingPolicy(Campaign_Validator)
-    .validTo(date)
-    .complete({canonical: false});
+    .validFrom(date)
+    .complete({ canonical: false });
 
   submit(tx);
   console.log("Campaign name", toText(campaign.name));
