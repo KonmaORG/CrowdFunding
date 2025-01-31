@@ -336,8 +336,11 @@ pub fn must_send_state_token(
 }
 
 pub fn must_happen_before(range: ValidityRange, lock_expiration_time: Int) {
-  when range.upper_bound.bound_type is {
-    Finite(tx_latest_time) -> (lock_expiration_time >= tx_latest_time)?
+  when range.lower_bound.bound_type is {
+    Finite(tx_latest_time) -> {
+      trace @"time": tx_latest_time
+      lock_expiration_time >= tx_latest_time
+    }
     _ -> False
   }
 }

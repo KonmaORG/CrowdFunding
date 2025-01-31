@@ -28,7 +28,7 @@ pub fn validate_create_campaign(
   expect creator == pkh
   expect goal > 0
   // expect unwrap.finite_start_of(tx.validity_range) < deadline
-  trace @"dead": deadline
+  // trace @"dead": deadline
   // trace @"validity": unwrap.finite_start_of(tx.validity_range)
   and {
     utils.must_happen_before(tx.validity_range, deadline)?,
