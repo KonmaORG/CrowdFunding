@@ -40,7 +40,6 @@ export default function HomePage() {
         
             Object.entries(utxo.assets).map(([assetKey, quantity]) => {
               if (!assetKey.startsWith(IdetificationPID) && !assetKey.startsWith('lovelace')) { 
-                console.log(assetKey, quantity);
                 setBalance((prev) => [
                   ...prev,
                   { unit: assetKey, quantity: Number(quantity) },

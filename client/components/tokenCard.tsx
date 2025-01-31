@@ -64,7 +64,7 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
             Support
           </Button>
         </CardFooter>
-        <CampaignModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} datum={datum} />
+        <CampaignModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} datum={datum} metadata={metadata} />
       </Card>
     )
   )

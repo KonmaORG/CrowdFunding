@@ -78,7 +78,7 @@ export const CampaignDatum = CampaignDatumSchema as unknown as CampaignDatum;
 
 export const BackerDatumSchema = AddressSchema;
 export type BackerDatum = Data.Static<typeof BackerDatumSchema>;
-export const BAckerDatum = BackerDatumSchema as unknown as BackerDatum;
+export const BackerDatum = BackerDatumSchema as unknown as BackerDatum;
 
 //-----------------------------
 export const MultisigSchema = Data.Object({
@@ -113,6 +113,8 @@ export const CampaignActionRedeemer = {
 export type MetadataType = {
   name: string
   image: string
-  campaignName?: string
-  description?: string
+  campaignName: string
+  description: string
+  hash: string,
+  outputIndex: number
 }

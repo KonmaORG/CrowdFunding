@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { CampaignDatum } from "@/types/cardano"
+import type { CampaignDatum, MetadataType } from "@/types/cardano"
 import {
   Dialog,
   DialogContent,
@@ -14,19 +14,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { toAda } from "@/lib/utils"
+import { useWallet } from "@/context/walletContext"
+import { metadata } from "@/app/layout"
+import { SupportCampaign } from "./transaction/SupportCampaign"
 
 interface CampaignModalProps {
   isOpen: boolean
   onClose: () => void
   datum: CampaignDatum
+  metadata: MetadataType
 }
 
-export function CampaignModal({ isOpen, onClose, datum }: CampaignModalProps) {
+export function CampaignModal({ isOpen, onClose, datum, metadata }: CampaignModalProps) {
   const [supportAmount, setSupportAmount] = useState("")
   const [error, setError] = useState("")
+  const [WalletConnection] = useWallet();
 
-  const handleConfirm = () => {
-    console.log(`Supporting with amount: ${supportAmount}`)
+  const handleConfirm = async () => {
+    const supportedAmount = Number.parseFloat(supportAmount)
+    const minSupportAmount = toAda(datum.goal) / Number(datum.fraction)
+    const supportedFraction = Math.round(supportedAmount / Number(minSupportAmount))
+
+    await SupportCampaign(WalletConnection, datum, metadata, supportedFraction)
     onClose()
     setSupportAmount("")
     setError("")

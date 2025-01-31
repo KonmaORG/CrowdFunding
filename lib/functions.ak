@@ -57,9 +57,12 @@ pub fn validate_support_campaign(
 
   let (backer_amount, script_token) =
     utils.find_output_from_addr(outputs, self_script, name)
+  trace @"backer lovelace": backer_amount
+  trace @"backer reward": backer_reward_token
+  trace @"script reward": script_token
   and {
-    script_reward_token == script_token,
-    backer_amount / fraction_amount == backer_reward_token,
+    (script_reward_token == script_token)?,
+    (backer_amount / fraction_amount == backer_reward_token)?,
   }
 }
 

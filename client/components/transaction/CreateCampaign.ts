@@ -74,12 +74,16 @@ export async function CreateCampaign(
           campaignName: toText(campaign.name),
           image: "https://avatars.githubusercontent.com/u/106166350",
           description: description,
+          hash: utxo[0].txHash,
+          outputIndex: utxo[0].outputIndex,
         },
         [toText(campaign.name)]: {
           name: toText(campaign.name),
           campaignName: toText(campaign.name),
           image: "https://avatars.githubusercontent.com/u/106166350",
           description: description,
+          hash: utxo[0].txHash,
+          outputIndex: utxo[0].outputIndex,
         },
       },
     })
