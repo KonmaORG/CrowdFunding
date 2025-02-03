@@ -10,7 +10,7 @@ use cardano/transaction.{
 }
 use config
 use crowdfunding/types.{
-  BackerDatum, CampaignDatum, ConfigDatum, Initiated, Multisig, PaymentKeyHash,
+  BackerDatum, CampaignDatum, ConfigDatum, Multisig, PaymentKeyHash,
   Running, StakeKeyHash,
 }
 use test_kit/time/unwrap
@@ -90,11 +90,11 @@ pub fn must_send_state_reward_token(
           and {
             trace @"11111111111111111111"
             assets.quantity_of(value, self_script, config.state_token) == 1,
-            if with_datum.state == Initiated {
-              address == state_token_address
-            } else {
-              address == self_address
-            },
+            // if with_datum.state == Initiated {
+            address == state_token_address,
+            // } else {
+            //   address == self_address
+            // },
             output_datum == with_datum_data,
           },
           and {
@@ -114,6 +114,28 @@ pub fn must_send_state_reward_token(
 
   trace @"counter": counter
   counter == 2
+}
+
+pub fn must_update_state_token(
+  tx: Transaction,
+  self_script: PolicyId,
+  state_token_address: Address,
+  with_datum: CampaignDatum,
+) -> Bool {
+  let with_datum_data: Data = with_datum
+  let Output { address, datum, value, .. } <- list.any(tx.outputs)
+
+  when datum is {
+    // STATE token to state_token addr or self_script if state is not running
+    InlineDatum(output_datum) -> and {
+        assets.quantity_of(value, self_script, config.state_token) == 1,
+        address == state_token_address,
+        output_datum == with_datum_data,
+      }
+
+    // REWARD token to self script addr
+    _ -> False
+  }
 }
 
 pub fn is_running_campaign(
@@ -363,4 +385,36 @@ pub fn is_datum_addr_same(
       }
     },
   )
+}
+
+pub fn must_pay_to_script(
+  tx: Transaction,
+  self_script: PolicyId,
+  campaign_datum: CampaignDatum,
+){
+  let self_address= Address(Script(self_script), None)
+  let sum_support =
+    fn(sum, Input { output: Output { address, datum, value, .. }, .. }) {
+      if address == self_address {
+        when datum is {
+          InlineDatum(input_datum) ->
+            if input_datum is BackerDatum {
+              assets.lovelace_of(value) + sum
+            } else {
+              sum
+            }
+          _ -> sum
+        }
+      } else {
+        sum
+      }
+    }
+    let supports = tx.inputs |> list.reduce(0, sum_support)
+
+    list.any(tx.outputs, fn(o){
+      and {
+        o.address == self_address,
+      assets.lovelace_of(o.value) >= supports
+      }
+    })
 }

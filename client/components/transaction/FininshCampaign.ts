@@ -59,12 +59,13 @@ export async function FinishCampaign(lucid: LucidEvolution, address: string) {
     single = await tx.pay
       .ToAddress(address, { lovelace: 2_000_000n })
       .complete();
-  } else {
-    milestone = await tx.pay
-      .ToAddress(crowfunding_addr, { lovelace: 2_000_000n })
-      .validFrom(Math.floor(Number(datum.deadline)))
-      .complete();
-  }
+  } 
+  // else {
+  //   milestone = await tx.pay
+  //     .ToAddress(crowfunding_addr, { lovelace: 2_000_000n })
+  //     .validFrom(Math.floor(Number(datum.deadline)))
+  //     .complete();
+  // }
 }
 
 function calulatePayout(amount: number) {

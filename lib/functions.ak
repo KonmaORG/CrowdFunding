@@ -120,12 +120,13 @@ pub fn validate_finish_campaign(
         utils.must_be_signed_by(tx, campaign_datum.creator.1st)?
       },
       utils.is_running_campaign(tx.inputs, self_script)?,
-      utils.must_send_state_reward_token(
+      utils.must_update_state_token(
         tx,
         self_script,
         state_token_script,
         with_datum: CampaignDatum { ..campaign_datum, state: Finished },
       )?,
+      utils.must_pay_to_script(tx, self_script, campaign_datum)
     }
   } else if current_datum is BackerDatum {
     // must consume state token UTxO successfully
