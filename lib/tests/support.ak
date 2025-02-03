@@ -4,6 +4,7 @@ use cardano/assets.{from_lovelace}
 // use cardano/transaction.{
 //   InlineDatum, Input, NoDatum, Output, OutputReference, Transaction, placeholder,
 // }
+use cardano/transaction.{InlineDatum}
 use crowdfunding/types.{CampaignDatum, Finished, Initiated, Running}
 use functions
 use mocktail/virgin_address.{mock_pub_key_address}
@@ -39,20 +40,6 @@ test supoort_pass() {
       fraction: 10,
     }
 
-  //   //   let fraction_amount = goal / fraction
-  //   let inputs1 =
-  //     Input {
-  //       output_reference: mock_utxo_ref(1, 0),
-  //       output: Output {
-  //         address: Address {
-  //           payment_credential: VerificationKey(mock_pub_key_hash(0)),
-  //           stake_credential: None,
-  //         },
-  //         value: from_lovelace(9000),
-  //         datum: NoDatum,
-  //         reference_script: None,
-  //       },
-  //     }
   let reward_pid = mock_policy_id(0)
 
   let token_name = assets.from_asset(reward_pid, datum.name, 1)
@@ -68,6 +55,7 @@ test supoort_pass() {
   let tx_out_script =
     txn.new_tx_output(scritp_address)
       |> add_asset_to_tx_output(token_to_script)
+      |> set_datum_of_tx_output(datum |> InlineDatum)
 
   let backer_deposit =
     txn.new_tx_output(scritp_address)

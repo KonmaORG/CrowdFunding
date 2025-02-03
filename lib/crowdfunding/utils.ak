@@ -264,7 +264,6 @@ pub fn find_output_from_PID(
   let reward_token_to_backer =
     assets.quantity_of(supporter_output.value, policy_id, name)
   let script_token = assets.quantity_of(script_output.value, policy_id, name)
-
   (reward_token_to_backer, script_token)
 }
 
@@ -343,4 +342,25 @@ pub fn must_happen_before(range: ValidityRange, lock_expiration_time: Int) {
     }
     _ -> False
   }
+}
+
+pub fn is_datum_addr_same(
+  outputs: List<Output>,
+  current_datum: CampaignDatum,
+  policy_id: PolicyId,
+) {
+  let current_datum_data: Data = current_datum
+  let script_add = Address(Script(policy_id), None)
+  list.any(
+    outputs,
+    fn(o) {
+      when o.datum is {
+        InlineDatum(output_datum) -> and {
+            current_datum_data == output_datum,
+            o.address == script_add,
+          }
+        _ -> False
+      }
+    },
+  )
 }

@@ -63,6 +63,7 @@ pub fn validate_support_campaign(
   and {
     (script_reward_token == script_token)?,
     (backer_amount / fraction_amount == backer_reward_token)?,
+    utils.is_datum_addr_same(outputs, datum, self_script),
   }
 }
 
