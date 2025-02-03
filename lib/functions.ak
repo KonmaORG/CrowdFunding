@@ -114,7 +114,7 @@ pub fn validate_finish_campaign(
     let is_signed_by_platform =
       utils.atleast_signedby(tx.extra_signatories, multisig)
     and {
-      if is_signed_by_platform? {
+      if is_signed_by_platform {
         utils.must_be_after_deadline(tx, campaign_datum.deadline)?
       } else {
         utils.must_be_signed_by(tx, campaign_datum.creator.1st)?

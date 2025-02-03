@@ -57,6 +57,16 @@ export const CampaignStateSchema = Data.Enum([
   CampaignState.Finished.Schema,
 ]);
 
+export const CampaignStateRedeemer = {
+  Initiated: Data.to(new Constr(0, [])),
+  Running: Data.to(new Constr(1, [])),
+  Cancelled: Data.to(new Constr(2, [])),
+  Finished: Data.to(new Constr(3, [])),
+};
+
+// export type CampaignState = Data.Static<typeof CampaignStateSchema>;
+// export const CampaignState = CampaignStateSchema as unknown as CampaignState;
+
 //#endregion
 
 //#region Datum
@@ -108,13 +118,11 @@ export const CampaignActionRedeemer = {
   Release: Data.to(new Constr(4, [])),
 };
 
-
-
 export type MetadataType = {
-  name: string
-  image: string
-  campaignName: string
-  description: string
-  hash: string,
-  outputIndex: number
-}
+  name: string;
+  image: string;
+  campaignName: string;
+  description: string;
+  hash: string;
+  outputIndex: number;
+};

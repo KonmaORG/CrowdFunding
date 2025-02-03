@@ -5,10 +5,12 @@ import {
   CrowdfundingValidator,
   StateTokenValidator,
 } from "@/config/scripts/scripts";
-import { getAddress } from "@/lib/utils";
+import { FindRefUtxo, getAddress } from "@/lib/utils";
 import {
   CampaignActionRedeemer,
   CampaignDatum,
+  CampaignState,
+  CampaignStateRedeemer,
   MetadataType,
 } from "@/types/cardano";
 import {
@@ -54,11 +56,16 @@ export async function FinishCampaign(
     let utxos = await lucid.utxosAt(contarctAddress);
     // tokens
     const state = fromText("STATE_TOKEN");
-    const stateToken = { [`${policyId}${state}`]: 1n };
+    const stateTokenKey = `${policyId}${state}`;
+    const stateToken = { [stateTokenKey]: 1n };
     const rewardTokenKey = `${policyId}${datum.name}`;
     // utxo lovelace
     const { lovelace, rewardToken } = sumUtxoAmounts(utxos, rewardTokenKey);
     const rewardTokenBurn = { [rewardTokenKey]: -rewardToken };
+    // state token utxo
+    const state_utxo = await lucid.utxosAtWithUnit(state_addr, stateTokenKey);
+    // ref_utxo
+    const ref_utxo = await FindRefUtxo(lucid, state_addr);
     // const ownerPay = calulatePayout(Number(datum.goal)).seller;
     // const PlatformPay = calulatePayout(Number(datum.goal)).marketplace;
 
@@ -67,7 +74,9 @@ export async function FinishCampaign(
     // attach ref_utxo
     const tx = lucid
       .newTx()
+      .readFrom(ref_utxo)
       .collectFrom(utxos, redeemer)
+      .collectFrom(state_utxo, CampaignStateRedeemer.Finished)
       .pay.ToAddressWithData(
         state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
@@ -79,14 +88,12 @@ export async function FinishCampaign(
         { lovelace: lovelace }
       )
       .mintAssets(rewardTokenBurn, Data.to(updatedDatum, CampaignDatum))
+      .attach.Script(Campaign_Validator)
+      .attach.SpendingValidator(StateTokenValidator())
       .addSigner(address)
       .complete();
-    // else {
-    //   milestone = await tx.pay
-    //     .ToAddress(crowfunding_addr, { lovelace: 2_000_000n })
-    //     .validFrom(Math.floor(Number(datum.deadline)))
-    //     .complete();
-    // }
+
+    console.log("tx complete");
   } catch (error) {
     console.log(error);
   }
