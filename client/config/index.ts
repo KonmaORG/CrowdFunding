@@ -14,7 +14,7 @@ export const NETWORK: Network = NETWORKx;
 export const PROVIDER: Provider = new Blockfrost(BF_URL, BF_PID);
 
 export const IdetificationPID =
-  "34c4e44f58bef10c6dacff72ba559523269ad15f138fe693eededf82"; //preview
+  "ea28a723993520e0061a471fcbc473371ddb8baa351e333e9776fe51"; //preview
 // "93a74c2bd74b872e0e895269626ce4c94f13a45f3743c63e17a8e513"; //emulator
 
 export const PLATFORMADDR =

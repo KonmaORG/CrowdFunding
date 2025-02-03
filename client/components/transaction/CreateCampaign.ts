@@ -89,7 +89,7 @@ export async function CreateCampaign(
     })
     .attach.MintingPolicy(Campaign_Validator)
     .validFrom(date)
-    .complete({ canonical: false });
+    .complete({});
 
   submit(tx);
   console.log("Campaign name", toText(campaign.name));

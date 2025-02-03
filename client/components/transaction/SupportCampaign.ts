@@ -80,16 +80,16 @@ export async function SupportCampaign(
       })
       .pay.ToContract(
         contarctAddress,
-        { kind: "inline", value: Data.to(backerDatum, BackerDatum) },
-        { lovelace: payToContract }
-      )
-      .pay.ToContract(
-        contarctAddress,
         { kind: "inline", value: Data.to(datum, CampaignDatum) },
         {
           lovelace: 2n,
           [rewardToken]: BigInt(rewardTokenQty - supportFraction),
         }
+      )
+      .pay.ToContract(
+        contarctAddress,
+        { kind: "inline", value: Data.to(backerDatum, BackerDatum) },
+        { lovelace: payToContract }
       )
       .attach.SpendingValidator(Campaign_Validator)
       .complete();
