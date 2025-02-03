@@ -16,11 +16,26 @@ import {
   toText,
 } from "@lucid-evolution/lucid";
 
+/**
+ * Creates a new campaign
+ * @param lucid Lucid instance
+ * @param address User's wallet address
+ * @param campaign Campaign data
+ * @param description Campaign description
+ *
+ * This function creates a new campaign on the blockchain, and mints the campaign token.
+ * The campaign data is stored in the transaction's metadata.
+ *
+ * It first collects the user's UTxO, and reads the state token from the reference UTxO.
+ * It then mints the state token and the campaign token, and pays them to the campaign script.
+ * It also attaches the campaign data to the transaction's metadata.
+ * Finally, it sets the transaction's validity range to the latest block time.
+ */
 export async function CreateCampaign(
   lucid: LucidEvolution,
   address: string,
   campaign: CampaignDatum,
-  description: string,
+  description: string
 ) {
   if (!lucid) throw Error("Uninitialized Lucid!!!");
   let utxo = await lucid.utxosAt(address);
@@ -48,6 +63,7 @@ export async function CreateCampaign(
   // console.log(Data.to(campaign, CampaignDatum));
   // console.log(campaign.deadline, campaign.goal, campaign.creator);
   // const date1 = Math.floor(Number(campaign.deadline));
+
   const date = await blockfrost.getLatestTime();
   const tx = await lucid
     .newTx()
