@@ -92,6 +92,7 @@ export async function CreateCampaign(
           description: description,
           hash: utxo[0].txHash,
           outputIndex: utxo[0].outputIndex,
+          address: script_addr,
         },
         [toText(campaign.name)]: {
           name: toText(campaign.name),
@@ -100,6 +101,7 @@ export async function CreateCampaign(
           description: description,
           hash: utxo[0].txHash,
           outputIndex: utxo[0].outputIndex,
+          address: script_addr,
         },
       },
     })
