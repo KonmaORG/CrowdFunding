@@ -126,7 +126,8 @@ pub fn validate_finish_campaign(
         state_token_script,
         with_datum: CampaignDatum { ..campaign_datum, state: Finished },
       )?,
-      utils.must_pay_to_script(tx, self_script, campaign_datum)
+      utils.must_pay_to_script(tx, self_script, campaign_datum),
+      utils.must_burn_reward_token(tx, self_script),
     }
   } else if current_datum is BackerDatum {
     // must consume state token UTxO successfully

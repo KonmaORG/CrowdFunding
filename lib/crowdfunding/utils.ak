@@ -10,8 +10,8 @@ use cardano/transaction.{
 }
 use config
 use crowdfunding/types.{
-  BackerDatum, CampaignDatum, ConfigDatum, Multisig, PaymentKeyHash,
-  Running, StakeKeyHash,
+  BackerDatum, CampaignDatum, ConfigDatum, Multisig, PaymentKeyHash, Running,
+  StakeKeyHash,
 }
 use test_kit/time/unwrap
 
@@ -391,8 +391,8 @@ pub fn must_pay_to_script(
   tx: Transaction,
   self_script: PolicyId,
   campaign_datum: CampaignDatum,
-){
-  let self_address= Address(Script(self_script), None)
+) {
+  let self_address = Address(Script(self_script), None)
   let sum_support =
     fn(sum, Input { output: Output { address, datum, value, .. }, .. }) {
       if address == self_address {
@@ -409,12 +409,21 @@ pub fn must_pay_to_script(
         sum
       }
     }
-    let supports = tx.inputs |> list.reduce(0, sum_support)
+  let supports = tx.inputs |> list.reduce(0, sum_support)
 
-    list.any(tx.outputs, fn(o){
+  list.any(
+    tx.outputs,
+    fn(o) {
       and {
         o.address == self_address,
-      assets.lovelace_of(o.value) >= supports
+        assets.lovelace_of(o.value) >= supports,
       }
-    })
+    },
+  )
+}
+
+pub fn must_burn_reward_token(tx: Transaction, self_script: PolicyId) {
+  expect [Pair(_, qty)] =
+    tx.mint |> assets.tokens(self_script) |> dict.to_pairs()
+  (qty < 0)?
 }

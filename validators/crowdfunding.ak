@@ -4,7 +4,7 @@ use cardano/assets.{PolicyId}
 use cardano/transaction.{Input, Output, OutputReference, Transaction}
 use crowdfunding/types.{
   BackerDatum, CampaignAction, CampaignDatum, Cancel, ConfigDatum, Finish,
-  Refund, Release, Support,
+  Finished, Refund, Release, Support,
 }
 use crowdfunding/utils
 use functions.{
@@ -22,16 +22,21 @@ validator campaign(
     policy_id self_script: PolicyId,
     tx: Transaction,
   ) {
-    let ConfigDatum { state_token_script, .. } =
-      utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
-    validate_create_campaign(
-      tx,
-      self_script,
-      campaign_datum,
-      nonce,
-      creator,
-      utils.script_address_from_tuple(state_token_script),
-    )
+    when campaign_datum.state is {
+      Finished -> utils.must_burn_reward_token(tx, self_script)
+      _ -> {
+        let ConfigDatum { state_token_script, .. } =
+          utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
+        validate_create_campaign(
+          tx,
+          self_script,
+          campaign_datum,
+          nonce,
+          creator,
+          utils.script_address_from_tuple(state_token_script),
+        )
+      }
+    }
   }
 
   spend(
