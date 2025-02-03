@@ -4,7 +4,7 @@ import {
   StateTokenValidator,
 } from "@/config/scripts/scripts";
 import { WalletConnection } from "@/context/walletContext";
-import { FindRefUtxo, getAddress } from "@/lib/utils";
+import { FindRefUtxo, getAddress, submit } from "@/lib/utils";
 import {
   BackerDatum,
   CampaignActionRedeemer,
@@ -48,7 +48,8 @@ export async function SupportCampaign(
     // tokens
     const reward = fromText(metadata.campaignName);
     const rewardToken = `${policyId}${reward}`;
-    const payToContract = BigInt(supportFraction) * datum.goal / datum.fraction
+    const payToContract =
+      (BigInt(supportFraction) * datum.goal) / datum.fraction;
     // utxo with token
     let utxoWithRewardToken: UTxO[] = await lucid.utxosAtWithUnit(
       contarctAddress,
@@ -93,6 +94,7 @@ export async function SupportCampaign(
       )
       .attach.SpendingValidator(Campaign_Validator)
       .complete();
+    submit(tx);
 
     return { data: tx, error: null };
   } catch (error: any) {
