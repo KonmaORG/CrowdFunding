@@ -16,6 +16,16 @@ name = "aiken-extra/test_kit"
 version = "helium"
 source = "github"
 
+[[requirements]]
+name = "sidan-lab/vodka"
+version = "0.1.6"
+source = "github"
+
+[[requirements]]
+name = "aiken-extra/tx_util"
+version = "1.215.202411"
+source = "github"
+
 [[packages]]
 name = "aiken-lang/stdlib"
 version = "2.2.0"
@@ -34,5 +44,17 @@ version = "helium"
 requirements = []
 source = "github"
 
+[[packages]]
+name = "sidan-lab/vodka"
+version = "0.1.6"
+requirements = []
+source = "github"
+
+[[packages]]
+name = "aiken-extra/tx_util"
+version = "1.215.202411"
+requirements = []
+source = "github"
+
 [etags]
-"aiken-extra/test_kit@helium" = [{ secs_since_epoch = 1738308034, nanos_since_epoch = 714895500 }, "8aeaede15f69f88f8eacc139d29696e0d7860b0e198debb21cdf082234d49d56"]
+"aiken-extra/test_kit@helium" = [{ secs_since_epoch = 1738557016, nanos_since_epoch = 508867526 }, "8aeaede15f69f88f8eacc139d29696e0d7860b0e198debb21cdf082234d49d56"]
