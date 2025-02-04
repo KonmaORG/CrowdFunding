@@ -67,8 +67,6 @@ export async function FinishCampaign(
     // ref_utxo
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
 
-    console.log("lovelace rewardtoken", lovelace, -rewardToken);
-    console.log("campaign utxos", utxos);
     const tx = await lucid
       .newTx()
       .readFrom(ref_utxo)

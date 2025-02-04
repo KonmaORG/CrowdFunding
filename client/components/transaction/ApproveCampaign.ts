@@ -44,21 +44,25 @@ export async function ApproveCampaign(
       oref,
       IdetificationPID,
     ]);
+    console.log(1);
     // validator address & policyId
     const policyId = mintingPolicyToId(Campaign_Validator);
     // refrence UTxO for ConfigDatum
     const state_addr = getAddress(StateTokenValidator);
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
+    console.log(2);
     // State TOken UTXO
     const stateToken = policyId + fromText("STATE_TOKEN");
     let UtxoWithStateToken: UTxO[] = await lucid.utxosAtWithUnit(
       state_addr,
       stateToken
     );
+    console.log(3, UtxoWithStateToken, stateToken);
 
     //   Redeemer & datum
     const redeemer = CampaignStateRedeemer.Running;
     const updatedDatum: CampaignDatum = { ...datum, state: "Running" };
+    console.log(4);
     // tx
     const tx = await lucid
       .newTx()
@@ -77,7 +81,7 @@ export async function ApproveCampaign(
       .addSigner(await privateKeytoAddress(SIGNER2))
       .addSigner(await privateKeytoAddress(SIGNER3))
       .complete();
-
+    console.log(5);
     const signed = multiSignwithPrivateKey(tx, [SIGNER1, SIGNER2, SIGNER3]);
     const txHash = await submit(signed);
     console.log("tx complete", txHash);

@@ -138,14 +138,14 @@ export const blockfrost = {
       // const result = await assetResponse.json();
       // return result.onchain_metadata;
       return {
-        hash: "cc26f6a07d3a3761d3d07cd37f0dc148d3169195fd1721a3910e95a2b984a85c",
         name: "STATE_TOKEN",
-        image: "https://avatars.githubusercontent.com/u/106166350",
-        address:
-          "addr_test1wpwq6ya55fukpl9ctghp98sdl2pq506qj3vp7m7xrp89f2svh6phq",
-        description: "emulator Descriptiong",
-        outputIndex: 1,
         campaignName: "emulator",
+        image: "https://avatars.githubusercontent.com/u/106166350",
+        description: "",
+        hash: "b2fb1a70a0e9d2854e26573f18d42c11afc682b09f88c63c1d8e9bcfee62cade",
+        outputIndex: 1,
+        address:
+          "addr_test1wrls3fuyyexjagaqx9a28mkttxddd3rvctzkrry86qxse8ssmpcj8",
       };
     } catch (err: any) {
       return err.message;

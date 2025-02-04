@@ -117,15 +117,11 @@ pub fn must_update_state_token(
 
   when datum is {
     // STATE token to state_token addr or self_script if state is not running
-    InlineDatum(output_datum) -> {
-      trace @"output.address": address
-      trace @"state_token_Address": state_token_address
-      and {
+    InlineDatum(output_datum) -> and {
         (assets.quantity_of(value, self_script, config.state_token) == 1)?,
         (address == state_token_address)?,
         (output_datum == with_datum_data)?,
       }
-    }
 
     // REWARD token to self script addr
     _ -> False

@@ -66,7 +66,7 @@ validator campaign(
             self_script,
             campaign_datum,
             multisig,
-            utils.address_from_tuple(state_token_script),
+            utils.script_address_from_tuple(state_token_script),
           )
         } else if current_datum is backer_datum: BackerDatum {
           tx |> validate_refund_support(self_script, backer_datum)
@@ -80,7 +80,7 @@ validator campaign(
           tx,
           self_script,
           current_datum,
-          utils.address_from_tuple(state_token_script),
+          utils.script_address_from_tuple(state_token_script),
           multisig,
         )
       // Refund campaign:
@@ -98,7 +98,7 @@ validator campaign(
             self_script,
             campaign_datum,
             platform,
-            utils.address_from_tuple(state_token_script),
+            utils.script_address_from_tuple(state_token_script),
             multisig,
           )
         } else {

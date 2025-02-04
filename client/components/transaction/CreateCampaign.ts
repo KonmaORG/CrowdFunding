@@ -110,7 +110,15 @@ export async function CreateCampaign(
     .attach.MintingPolicy(Campaign_Validator)
     .validFrom(date)
     .complete({});
-
+  console.log({
+    name: "STATE_TOKEN",
+    campaignName: toText(campaign.name),
+    image: "https://avatars.githubusercontent.com/u/106166350",
+    description: description,
+    hash: utxo[0].txHash,
+    outputIndex: utxo[0].outputIndex,
+    address: script_addr,
+  });
   submit(tx);
   console.log("Campaign name", toText(campaign.name));
   console.log("Campaign Goal", campaign.goal);
