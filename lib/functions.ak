@@ -31,16 +31,16 @@ pub fn validate_create_campaign(
   // trace @"dead": deadline
   // trace @"validity": unwrap.finite_start_of(tx.validity_range)
   and {
-    utils.must_happen_before(tx.validity_range, deadline)?,
-    utils.milestone_status(milestone)?,
-    utils.must_consume_creator_nonce(tx, creator, nonce)?,
-    utils.must_mint_state_and_reward_token(tx, self_script, campaign_datum)?,
+    utils.must_happen_before(tx.validity_range, deadline),
+    utils.milestone_status(milestone),
+    utils.must_consume_creator_nonce(tx, creator, nonce),
+    utils.must_mint_state_and_reward_token(tx, self_script, campaign_datum),
     utils.must_send_state_reward_token(
       tx,
       self_script,
       state_token_script,
       campaign_datum,
-    )?,
+    ),
   }
 }
 
@@ -58,14 +58,12 @@ pub fn validate_support_campaign(
 
   let (backer_amount, script_token) =
     utils.find_output_from_addr(outputs, self_script, name)
-  trace @"backer lovelace": backer_amount
-  trace @"backer reward": backer_reward_token
-  trace @"script reward": script_token
+
   and {
-    utils.is_running_campaign(reference_inputs, self_script)?,
-    (script_reward_token == script_token)?,
-    (backer_amount / fraction_amount == backer_reward_token)?,
-    utils.is_datum_addr_same(outputs, datum, self_script)?,
+    utils.is_running_campaign(reference_inputs, self_script),
+    script_reward_token == script_token,
+    backer_amount / fraction_amount == backer_reward_token,
+    utils.is_datum_addr_same(outputs, datum, self_script),
   }
 }
 

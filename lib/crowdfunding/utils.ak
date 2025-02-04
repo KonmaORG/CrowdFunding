@@ -81,14 +81,8 @@ pub fn must_send_state_reward_token(
 
     when datum is {
       // STATE token to state_token addr or self_script if state is not running
-      InlineDatum(output_datum) -> {
-        trace @"address": address
-        trace @"state token addres": address == state_token_address
-        trace @"state_token_address": state_token_address
-
-        or {
+      InlineDatum(output_datum) -> or {
           and {
-            trace @"11111111111111111111"
             assets.quantity_of(value, self_script, config.state_token) == 1,
             // if with_datum.state == Initiated {
             address == state_token_address,
@@ -98,21 +92,17 @@ pub fn must_send_state_reward_token(
             output_datum == with_datum_data,
           },
           and {
-            trace @"2222222222222222222"
-
             address == self_address,
             assets.quantity_of(value, self_script, with_datum.name) == with_datum.fraction,
             output_datum == with_datum_data,
           },
         }
-      }
 
       // REWARD token to self script addr
       _ -> False
     }
   }
 
-  trace @"counter": counter
   counter == 2
 }
 
@@ -205,7 +195,7 @@ pub fn must_refund(
     }
   let output_lovelace = list.reduce(tx.outputs, 0, sum_output)
 
-  (output_lovelace >= input_lovelace)?
+  output_lovelace >= input_lovelace
 }
 
 pub fn must_reach_goal_and_send_to_creator(
@@ -347,15 +337,11 @@ pub fn must_send_state_token(
   let Output { address, datum, value, .. } <- list.any(tx.outputs)
   when datum is {
     // STATE token to state_token addr or self_script if state is not running
-    InlineDatum(output_datum) -> {
-      trace @"output value": value
-      trace @"input value": self_input.output.value
-      and {
-        (address == self_address)?,
-        (output_datum == with_datum_data)?,
-        assets.match(value, self_input.output.value, >=)?,
+    InlineDatum(output_datum) -> and {
+        address == self_address,
+        output_datum == with_datum_data,
+        assets.match(value, self_input.output.value, >=),
       }
-    }
 
     _ -> False
   }
@@ -435,5 +421,5 @@ pub fn must_pay_to_script(
 pub fn must_burn_reward_token(tx: Transaction, self_script: PolicyId) {
   expect [Pair(_, qty)] =
     tx.mint |> assets.tokens(self_script) |> dict.to_pairs()
-  (qty < 0)?
+  qty < 0
 }
