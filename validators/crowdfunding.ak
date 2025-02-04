@@ -54,7 +54,7 @@ validator campaign(
       // Support campaign:
       (Some(current_datum), Support) ->
         if current_datum is campaign_datum: CampaignDatum {
-          validate_support_campaign(tx.outputs, campaign_datum, self_script)
+          validate_support_campaign(tx, campaign_datum, self_script)
         } else {
           fail @"Invalid Cancel Datum Type! Must be CampaignDatum"
         }

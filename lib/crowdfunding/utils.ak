@@ -392,6 +392,7 @@ pub fn must_pay_to_script(
   self_script: PolicyId,
   campaign_datum: CampaignDatum,
 ) {
+  let campaign_datum_data: Data = campaign_datum
   let self_address = Address(Script(self_script), None)
   let sum_support =
     fn(sum, Input { output: Output { address, datum, value, .. }, .. }) {
@@ -414,9 +415,13 @@ pub fn must_pay_to_script(
   list.any(
     tx.outputs,
     fn(o) {
-      and {
-        o.address == self_address,
-        assets.lovelace_of(o.value) >= supports,
+      when o.datum is {
+        InlineDatum(datum_data) -> and {
+            campaign_datum_data == datum_data,
+            o.address == self_address,
+            assets.lovelace_of(o.value) >= supports,
+          }
+        _ -> False
       }
     },
   )

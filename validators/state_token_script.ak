@@ -12,7 +12,6 @@ validator state_token_script(config_nft: PolicyId) {
   ) {
     expect Some(datum) = datum
     if datum is campaign_datum: CampaignDatum {
-      //TODO:  write function that will update the campaign state to Running for statetokena nd reward token
       let ConfigDatum { multisig, .. } =
         utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
       and {
