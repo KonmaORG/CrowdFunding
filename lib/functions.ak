@@ -62,10 +62,10 @@ pub fn validate_support_campaign(
   trace @"backer reward": backer_reward_token
   trace @"script reward": script_token
   and {
-    utils.is_running_campaign(reference_inputs, self_script),
+    utils.is_running_campaign(reference_inputs, self_script)?,
     (script_reward_token == script_token)?,
     (backer_amount / fraction_amount == backer_reward_token)?,
-    utils.is_datum_addr_same(outputs, datum, self_script),
+    utils.is_datum_addr_same(outputs, datum, self_script)?,
   }
 }
 

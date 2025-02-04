@@ -48,6 +48,7 @@ export async function SupportCampaign(
     // tokens
     const reward = fromText(metadata.campaignName);
     const rewardToken = `${policyId}${reward}`;
+    const stateToken = policyId + fromText("STATE_TOKEN");
     const payToContract =
       (BigInt(supportFraction) * datum.goal) / datum.fraction;
     // utxo with token
@@ -67,13 +68,14 @@ export async function SupportCampaign(
       paymentCredentialOf(address).hash,
       stakeCredentialOf(address).hash,
     ];
-    // refrence UTxO for ConfigDatum
+    // refrence UTxO for ConfigDatum & CampaignDatum StateToken
     const state_addr = getAddress(StateTokenValidator);
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
-
+    const state_utxo = await lucid.utxosAtWithUnit(state_addr, stateToken);
+    console.log(state_utxo);
     const tx = await lucid
       .newTx()
-      .readFrom(ref_utxo)
+      .readFrom([...ref_utxo, ...state_utxo])
       .collectFrom(utxoWithRewardToken, redeemer)
       .pay.ToAddress(address, {
         lovelace: 2n,

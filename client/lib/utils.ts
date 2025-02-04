@@ -84,6 +84,21 @@ export async function privateKeytoAddress(privateKey: string) {
   return privateeyAddress;
 }
 
+export function multiSignwithPrivateKey(
+  tx: TxSignBuilder,
+  privateKeys: string[]
+) {
+  let signed = tx;
+  for (const privateKey of privateKeys) {
+    signed = signWithPrivateKey(signed, privateKey);
+  }
+  return signed;
+}
+export function signWithPrivateKey(tx: TxSignBuilder, privateKey: string) {
+  const signed = tx.sign.withPrivateKey(privateKey);
+  return signed;
+}
+
 export async function FindRefUtxo(lucid: LucidEvolution, address: string) {
   const asset = fromText("ConfigNFT");
   const token = `${IdetificationPID}${asset}`;
@@ -103,7 +118,6 @@ export function toAda(value: BigInt) {
 export function toLovelace(value: number) {
   return BigInt(value * 1_000_000);
 }
-
 
 export const blockfrost = {
   getMetadata: async (asset: string) => {

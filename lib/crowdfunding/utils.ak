@@ -151,7 +151,8 @@ pub fn is_running_campaign(
   // must be campaign inline datum
   expect InlineDatum(campaign_datum) = datum
   expect CampaignDatum { state, .. } = campaign_datum
-  trace @"state"
+  trace @"Datum": campaign_datum
+  trace @"state": state
   state == Running
 }
 

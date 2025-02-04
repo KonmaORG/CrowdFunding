@@ -4,7 +4,13 @@ import {
   StateTokenValidator,
 } from "@/config/scripts/scripts";
 import { WalletConnection } from "@/context/walletContext";
-import { FindRefUtxo, getAddress, privateKeytoAddress } from "@/lib/utils";
+import {
+  FindRefUtxo,
+  getAddress,
+  multiSignwithPrivateKey,
+  privateKeytoAddress,
+  submit,
+} from "@/lib/utils";
 import {
   CampaignDatum,
   CampaignStateRedeemer,
@@ -53,7 +59,6 @@ export async function ApproveCampaign(
     //   Redeemer & datum
     const redeemer = CampaignStateRedeemer.Running;
     const updatedDatum: CampaignDatum = { ...datum, state: "Running" };
-    console.log(UtxoWithStateToken);
     // tx
     const tx = await lucid
       .newTx()
@@ -63,17 +68,19 @@ export async function ApproveCampaign(
         state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
         {
-          lovelace: 2n,
+          lovelace: 2_000_000n,
           [stateToken]: 1n,
         }
       )
       .attach.SpendingValidator(StateTokenValidator())
       .addSigner(await privateKeytoAddress(SIGNER1))
       .addSigner(await privateKeytoAddress(SIGNER2))
-      .addSigner(await privateKeytoAddress(SIGNER3));
-    //   .complete();
+      .addSigner(await privateKeytoAddress(SIGNER3))
+      .complete();
 
-    console.log("tx complete", tx);
+    const signed = multiSignwithPrivateKey(tx, [SIGNER1, SIGNER2, SIGNER3]);
+    const txHash = await submit(signed);
+    console.log("tx complete", txHash);
   } catch (error: any) {
     console.log(error.message);
   }
