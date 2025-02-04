@@ -88,8 +88,7 @@ export async function FinishCampaign(
       .addSigner(address)
       .complete();
 
-    console.log("tx complete", tx);
-    // submit(tx);
+    submit(tx);
   } catch (error) {
     console.log(error);
   }

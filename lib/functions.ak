@@ -112,7 +112,7 @@ pub fn validate_finish_campaign(
   if current_datum is campaign_datum: CampaignDatum {
     // platform can only finish after deadline, creator can finish early whevener the goal is reached
     let is_signed_by_platform =
-      utils.atleast_signedby(tx.extra_signatories, multisig)
+      utils.atleast_signedby(tx.extra_signatories, multisig)?
     and {
       if is_signed_by_platform {
         utils.must_be_after_deadline(tx, campaign_datum.deadline)?
@@ -126,8 +126,12 @@ pub fn validate_finish_campaign(
         state_token_script,
         with_datum: CampaignDatum { ..campaign_datum, state: Finished },
       )?,
-      utils.must_pay_to_script(tx, self_script, campaign_datum),
-      utils.must_burn_reward_token(tx, self_script),
+      utils.must_pay_to_script(
+        tx,
+        self_script,
+        campaign_datum: CampaignDatum { ..campaign_datum, state: Finished },
+      )?,
+      utils.must_burn_reward_token(tx, self_script)?,
     }
   } else if current_datum is BackerDatum {
     // must consume state token UTxO successfully

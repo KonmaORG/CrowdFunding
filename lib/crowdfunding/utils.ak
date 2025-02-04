@@ -400,7 +400,7 @@ pub fn must_pay_to_script(
       }
     }
   let supports = tx.inputs |> list.reduce(0, sum_support)
-
+  trace @"supports": supports
   list.any(
     tx.outputs,
     fn(o) {
@@ -413,7 +413,7 @@ pub fn must_pay_to_script(
         _ -> False
       }
     },
-  )
+  )?
 }
 
 pub fn must_burn_reward_token(tx: Transaction, self_script: PolicyId) {

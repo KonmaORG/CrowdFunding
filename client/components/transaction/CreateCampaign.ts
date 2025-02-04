@@ -61,10 +61,6 @@ export async function CreateCampaign(
 
   const ref_utxo = await FindRefUtxo(lucid, state_addr);
 
-  // console.log(Data.to(campaign, CampaignDatum));
-  // console.log(campaign.deadline, campaign.goal, campaign.creator);
-  // const date1 = Math.floor(Number(campaign.deadline));
-
   // const date = await blockfrost.getLatestTime();
   const date = emulator.now();
   const tx = await lucid
@@ -110,6 +106,7 @@ export async function CreateCampaign(
     .attach.MintingPolicy(Campaign_Validator)
     .validFrom(date)
     .complete({});
+
   console.log({
     name: "STATE_TOKEN",
     campaignName: toText(campaign.name),
@@ -119,13 +116,8 @@ export async function CreateCampaign(
     outputIndex: utxo[0].outputIndex,
     address: script_addr,
   });
+
   submit(tx);
-  console.log("Campaign name", toText(campaign.name));
-  console.log("Campaign Goal", campaign.goal);
-  console.log(
-    "Campaign Deadline:",
-    new Date(Number(campaign.deadline)).toLocaleString()
-  );
 }
 
 /// TODO see ariady code for Date.now(deadeline)

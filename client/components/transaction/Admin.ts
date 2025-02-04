@@ -49,7 +49,6 @@ export async function Identification_NFT_Mint(
 
   submit(tx);
   console.log("PID", minting_script);
-  console.log("TOKEN", asset);
 }
 
 export async function sendconfig(walletConnection: WalletConnection) {
@@ -75,7 +74,6 @@ export async function sendconfig(walletConnection: WalletConnection) {
     state_token_script: [paymentCredentialOf(state_token_addr).hash, ""],
     platform: paymentCredentialOf(PLATFORMADDR).hash,
   };
-  console.log(datum);
   const tx = await lucid
     .newTx()
     .pay.ToAddressWithData(
@@ -89,5 +87,4 @@ export async function sendconfig(walletConnection: WalletConnection) {
     .complete();
 
   submit(tx);
-  console.log("TOKEN", asset);
 }

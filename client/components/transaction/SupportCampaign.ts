@@ -72,7 +72,6 @@ export async function SupportCampaign(
     const state_addr = getAddress(StateTokenValidator);
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
     const state_utxo = await lucid.utxosAtWithUnit(state_addr, stateToken);
-    console.log(state_utxo);
     const tx = await lucid
       .newTx()
       .readFrom([...ref_utxo, ...state_utxo])

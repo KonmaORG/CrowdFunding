@@ -142,10 +142,10 @@ export const blockfrost = {
         campaignName: "emulator",
         image: "https://avatars.githubusercontent.com/u/106166350",
         description: "",
-        hash: "b2fb1a70a0e9d2854e26573f18d42c11afc682b09f88c63c1d8e9bcfee62cade",
+        hash: "70152c0f087b3cbf8de63be6870081fa2b783b2b66cf5706b28071ba9d2eed0c",
         outputIndex: 1,
         address:
-          "addr_test1wrls3fuyyexjagaqx9a28mkttxddd3rvctzkrry86qxse8ssmpcj8",
+          "addr_test1wqve55dfkgtx6a5esvu963z7svc8yhdc8qrr23xhq699nlcnz8024",
       };
     } catch (err: any) {
       return err.message;
