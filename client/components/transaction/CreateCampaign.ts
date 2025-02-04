@@ -1,4 +1,5 @@
 import { IdetificationPID, NETWORK } from "@/config";
+import { emulator } from "@/config/emulator";
 import {
   CrowdfundingValidator,
   StateTokenValidator,
@@ -64,7 +65,8 @@ export async function CreateCampaign(
   // console.log(campaign.deadline, campaign.goal, campaign.creator);
   // const date1 = Math.floor(Number(campaign.deadline));
 
-  const date = await blockfrost.getLatestTime();
+  // const date = await blockfrost.getLatestTime();
+  const date = emulator.now();
   const tx = await lucid
     .newTx()
     .collectFrom([utxo[0]])

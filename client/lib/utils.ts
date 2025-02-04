@@ -124,19 +124,29 @@ export const blockfrost = {
     const url = `${BF_URL}/assets/${asset}`;
 
     try {
-      const assetResponse = await fetch(url, {
-        method: "GET",
-        headers: {
-          project_id: BF_PID,
-        },
-      });
+      // const assetResponse = await fetch(url, {
+      //   method: "GET",
+      //   headers: {
+      //     project_id: BF_PID,
+      //   },
+      // });
 
-      if (!assetResponse.ok) {
-        throw new Error(`Error: ${assetResponse.statusText}`);
-      }
+      // if (!assetResponse.ok) {
+      //   throw new Error(`Error: ${assetResponse.statusText}`);
+      // }
 
-      const result = await assetResponse.json();
-      return result.onchain_metadata;
+      // const result = await assetResponse.json();
+      // return result.onchain_metadata;
+      return {
+        hash: "cc26f6a07d3a3761d3d07cd37f0dc148d3169195fd1721a3910e95a2b984a85c",
+        name: "STATE_TOKEN",
+        image: "https://avatars.githubusercontent.com/u/106166350",
+        address:
+          "addr_test1wpwq6ya55fukpl9ctghp98sdl2pq506qj3vp7m7xrp89f2svh6phq",
+        description: "emulator Descriptiong",
+        outputIndex: 1,
+        campaignName: "emulator",
+      };
     } catch (err: any) {
       return err.message;
     }
