@@ -346,11 +346,15 @@ pub fn must_send_state_token(
   let Output { address, datum, value, .. } <- list.any(tx.outputs)
   when datum is {
     // STATE token to state_token addr or self_script if state is not running
-    InlineDatum(output_datum) -> and {
+    InlineDatum(output_datum) -> {
+      trace @"output value": value
+      trace @"input value": self_input.output.value
+      and {
         (address == self_address)?,
         (output_datum == with_datum_data)?,
-        (value == self_input.output.value)?,
+        assets.match(value, self_input.output.value, >=)?,
       }
+    }
 
     _ -> False
   }

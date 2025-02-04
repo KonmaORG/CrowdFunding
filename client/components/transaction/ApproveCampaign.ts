@@ -39,7 +39,6 @@ export async function ApproveCampaign(
       IdetificationPID,
     ]);
     // validator address & policyId
-    const contarctAddress = validatorToAddress(NETWORK, Campaign_Validator);
     const policyId = mintingPolicyToId(Campaign_Validator);
     // refrence UTxO for ConfigDatum
     const state_addr = getAddress(StateTokenValidator);
@@ -54,12 +53,14 @@ export async function ApproveCampaign(
     //   Redeemer & datum
     const redeemer = CampaignStateRedeemer.Running;
     const updatedDatum: CampaignDatum = { ...datum, state: "Running" };
+    console.log(UtxoWithStateToken);
+    // tx
     const tx = await lucid
       .newTx()
       .readFrom(ref_utxo)
       .collectFrom(UtxoWithStateToken, redeemer)
       .pay.ToContract(
-        contarctAddress,
+        state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
         {
           lovelace: 2n,
@@ -69,10 +70,10 @@ export async function ApproveCampaign(
       .attach.SpendingValidator(StateTokenValidator())
       .addSigner(await privateKeytoAddress(SIGNER1))
       .addSigner(await privateKeytoAddress(SIGNER2))
-      .addSigner(await privateKeytoAddress(SIGNER3))
-      .complete();
+      .addSigner(await privateKeytoAddress(SIGNER3));
+    //   .complete();
 
-    console.log("tx complete");
+    console.log("tx complete", tx);
   } catch (error: any) {
     console.log(error.message);
   }
