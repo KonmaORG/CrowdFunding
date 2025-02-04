@@ -5,7 +5,7 @@ import {
   CrowdfundingValidator,
   StateTokenValidator,
 } from "@/config/scripts/scripts";
-import { FindRefUtxo, getAddress } from "@/lib/utils";
+import { FindRefUtxo, getAddress, submit } from "@/lib/utils";
 import {
   CampaignActionRedeemer,
   CampaignDatum,
@@ -66,34 +66,32 @@ export async function FinishCampaign(
     const state_utxo = await lucid.utxosAtWithUnit(state_addr, stateTokenKey);
     // ref_utxo
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
-    // const ownerPay = calulatePayout(Number(datum.goal)).seller;
-    // const PlatformPay = calulatePayout(Number(datum.goal)).marketplace;
 
-    // add state token with updated datum and must send back to state_script
-    // all utxos must go to self_address
-    // attach ref_utxo
-    const tx = lucid
+    console.log("state utxo", state_utxo);
+    console.log("campaign utxos", utxos);
+    const tx = await lucid
       .newTx()
       .readFrom(ref_utxo)
       .collectFrom(utxos, redeemer)
       .collectFrom(state_utxo, CampaignStateRedeemer.Finished)
-      .pay.ToAddressWithData(
+      .pay.ToContract(
         state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
         { lovelace: 2_000_000n, ...stateToken }
       )
-      .pay.ToAddressWithData(
+      .pay.ToContract(
         contarctAddress,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
         { lovelace: lovelace }
       )
       .mintAssets(rewardTokenBurn, Data.to(updatedDatum, CampaignDatum))
-      .attach.Script(Campaign_Validator)
+      .attach.SpendingValidator(Campaign_Validator)
       .attach.SpendingValidator(StateTokenValidator())
       .addSigner(address)
       .complete();
 
-    console.log("tx complete");
+    console.log("tx complete", tx);
+    // submit(tx);
   } catch (error) {
     console.log(error);
   }
