@@ -88,11 +88,15 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
           </div>
         </CardContent>
         <CardFooter className="flex items-center justify-between space-x-2 p-2">
-          <Button onClick={handleApprove}>Approve</Button>
+          <Button className="h-8 text-sm px-4" onClick={handleApprove}>
+            Approve
+          </Button>
           <Button className="h-8 text-sm px-4" onClick={handleSupport}>
             Support
           </Button>
-          <Button onClick={handleFinish}>Finish</Button>
+          <Button className="h-8 text-sm px-4" onClick={handleFinish}>
+            Finish
+          </Button>
         </CardFooter>
         <CampaignModal
           isOpen={isModalOpen}
