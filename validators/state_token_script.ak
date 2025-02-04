@@ -23,10 +23,11 @@ validator state_token_script(config_nft: PolicyId) {
           tx,
           oref,
           with_datum: CampaignDatum { ..campaign_datum, state: redeemer },
-        ),
+        )?,
       }
     } else if datum is config_datum: ConfigDatum {
-      utils.atleast_signedby(tx.extra_signatories, config_datum.multisig)
+      trace @"config_datum cond^"
+      utils.atleast_signedby(tx.extra_signatories, config_datum.multisig)?
     } else {
       fail @"Invalid Datum type recieved"
     }

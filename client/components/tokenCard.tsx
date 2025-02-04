@@ -20,6 +20,7 @@ import type { CampaignDatum, MetadataType } from "@/types/cardano";
 import { CampaignModal } from "./campaignModal";
 import { FinishCampaign } from "./transaction/FininshCampaign";
 import { useWallet } from "@/context/walletContext";
+import { ApproveCampaign } from "./transaction/ApproveCampaign";
 
 interface TokenCardProps {
   token: string;
@@ -44,6 +45,10 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
     setIsModalOpen(true);
   };
 
+  const handleApprove = async () => {
+    if (!metadata) return;
+    ApproveCampaign(WalletConnection, datum, metadata);
+  };
   const handleFinish = async () => {
     if (!metadata) return;
     FinishCampaign(WalletConnection, datum, metadata);
@@ -83,6 +88,7 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
           </div>
         </CardContent>
         <CardFooter className="flex items-center justify-between space-x-2 p-2">
+          <Button onClick={handleApprove}>Approve</Button>
           <Button className="h-8 text-sm px-4" onClick={handleSupport}>
             Support
           </Button>

@@ -347,9 +347,9 @@ pub fn must_send_state_token(
   when datum is {
     // STATE token to state_token addr or self_script if state is not running
     InlineDatum(output_datum) -> and {
-        address == self_address,
-        output_datum == with_datum_data,
-        value == self_input.output.value,
+        (address == self_address)?,
+        (output_datum == with_datum_data)?,
+        (value == self_input.output.value)?,
       }
 
     _ -> False
