@@ -82,16 +82,11 @@ export async function ReleaseFunds(
     );
 
     // tx
-    const tx = await lucid
+    let tx = lucid
       .newTx()
       .readFrom(ref_utxo)
       .collectFrom(campaignUtxos, CampaignActionRedeemer.Release)
       .collectFrom(state_utxo, CampaignStateRedeemer.Released)
-      .pay.ToContract(
-        contarctAddress,
-        { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
-        { lovelace: script as bigint }
-      )
       .pay.ToContract(
         state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
@@ -102,9 +97,21 @@ export async function ReleaseFunds(
       .attach.SpendingValidator(Campaign_Validator)
       .attach.SpendingValidator(StateTokenValidator())
       .addSigner(await privateKeytoAddress(SIGNER1))
-      .addSigner(await privateKeytoAddress(SIGNER2))
-      .complete();
-    console.log("tx compelte");
+      .addSigner(await privateKeytoAddress(SIGNER2));
+
+    if (script) {
+      tx = await tx.pay
+        .ToContract(
+          contarctAddress,
+          { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
+          { lovelace: script as bigint }
+        )
+        .complete();
+    } else {
+      tx = await tx.complete();
+    }
+
+    console.log("tx complete");
     // submit and sign by multisig
     multiSignwithPrivateKey(tx, [SIGNER1, SIGNER2]);
     const sign = await tx.sign.withWallet().complete();
