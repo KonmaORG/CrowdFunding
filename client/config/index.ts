@@ -18,7 +18,7 @@ export const IdetificationPID =
   "93a74c2bd74b872e0e895269626ce4c94f13a45f3743c63e17a8e513"; //emulator
 
 export const PLATFORMADDR =
-  "addr1qxu75psqc5c234da4tpzuqymmru6reqlaulq25k8ecqc53krhru8dgujmceyjamw6m636jzcdv834nkgll2nlpuyak6s2vnyff";
+  "addr_test1qp8lyrn3hpt07xf45qg5n0q9qcqanlfu08ja27ek6antfeswpy2laxtnvd8l78fxuw8fx5yse93a2guf9uap9adfflnsvd3vw6";
 
 export const SIGNER1 = process.env.NEXT_PUBLIC_SIGNER_1 as string;
 export const SIGNER2 = process.env.NEXT_PUBLIC_SIGNER_2 as string;

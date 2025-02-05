@@ -142,10 +142,10 @@ export const blockfrost = {
         campaignName: "ab",
         image: "https://avatars.githubusercontent.com/u/106166350",
         description: "",
-        hash: "84b80e8846095f54a09baedee7922a6e01cfa4648df2a081beafaface48fedb8",
+        hash: "a090e0bbf50b85a9e4b77bf205df4cf8565bfd52784c48e749cc002bf20581a0",
         outputIndex: 1,
         address:
-          "addr_test1wrhsxemyutpv9lhtl5rgltfulkkq56syqcjv07jsrvpmcrg0p4k0e",
+          "addr_test1wpmpak0udstqz9vrep6dtrpnxyysah7c8ck6d4jg2cx5nasemqzvl",
       };
     } catch (err: any) {
       return err.message;

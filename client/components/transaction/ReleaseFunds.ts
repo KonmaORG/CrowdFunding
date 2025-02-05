@@ -1,9 +1,20 @@
-import { IdetificationPID, NETWORK, SIGNER1, SIGNER2 } from "@/config";
+import {
+  IdetificationPID,
+  NETWORK,
+  PLATFORMADDR,
+  SIGNER1,
+  SIGNER2,
+} from "@/config";
 import {
   CrowdfundingValidator,
   StateTokenValidator,
 } from "@/config/scripts/scripts";
-import { FindRefUtxo, getAddress, privateKeytoAddress } from "@/lib/utils";
+import {
+  FindRefUtxo,
+  getAddress,
+  multiSignwithPrivateKey,
+  privateKeytoAddress,
+} from "@/lib/utils";
 import {
   CampaignActionRedeemer,
   CampaignDatum,
@@ -16,6 +27,7 @@ import {
   fromText,
   keyHashToCredential,
   mintingPolicyToId,
+  UTxO,
   validatorToAddress,
 } from "@lucid-evolution/lucid";
 import { Milestone } from "lucide-react";
@@ -62,6 +74,12 @@ export async function ReleaseFunds(
     const pc = keyHashToCredential(datum.creator[0]);
     const sc = keyHashToCredential(datum.creator[1]);
     const creatorAddress = credentialToAddress(NETWORK, pc, sc);
+    // calculating pay
+    const totalLovelace = sumUtxoAmounts(campaignUtxos).lovelace;
+    const { platform, creator, script } = calulatePay(
+      Number(totalLovelace),
+      datum.milestone
+    );
 
     // tx
     const tx = await lucid
@@ -72,14 +90,15 @@ export async function ReleaseFunds(
       .pay.ToContract(
         contarctAddress,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
-        { lovelace: 1n }
+        { lovelace: script as bigint }
       )
       .pay.ToContract(
         state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
         { lovelace: 2_000_000n, [stateTokenKey]: 1n }
       )
-      .pay.ToAddress(creatorAddress, { lovelace: 1n })
+      .pay.ToAddress(creatorAddress, { lovelace: creator })
+      .pay.ToAddress(PLATFORMADDR, { lovelace: platform })
       .attach.SpendingValidator(Campaign_Validator)
       .attach.SpendingValidator(StateTokenValidator())
       .addSigner(await privateKeytoAddress(SIGNER1))
@@ -87,8 +106,36 @@ export async function ReleaseFunds(
       .complete();
     console.log("tx compelte");
     // submit and sign by multisig
+    multiSignwithPrivateKey(tx, [SIGNER1, SIGNER2]);
+    const sign = await tx.sign.withWallet().complete();
+    const txHash = await sign.submit();
+    console.log(txHash);
   } catch (err: any) {
     console.log(err.message);
     return err.message;
   }
+}
+
+function calulatePay(amount: number, milestone: boolean[]) {
+  const remainingMilestones = milestone.filter((val) => val === false).length;
+
+  let platform = Math.ceil((amount * 5) / 100 / remainingMilestones);
+  let creator = Math.ceil((amount - platform) / remainingMilestones);
+  let script = Math.ceil(amount - amount / remainingMilestones);
+  return {
+    platform: BigInt(platform),
+    creator: BigInt(creator),
+    script: remainingMilestones > 1 ? BigInt(script) : null,
+  };
+}
+
+function sumUtxoAmounts(utxos: UTxO[]) {
+  return utxos.reduce(
+    (acc, utxo) => {
+      const assets = utxo.assets || {};
+      acc.lovelace += assets.lovelace || 0n;
+      return acc;
+    },
+    { lovelace: 0n }
+  );
 }

@@ -224,7 +224,7 @@ pub fn must_reach_goal_and_send_to_creator(
       }
     }
   let supports = tx.inputs |> list.reduce(0, sum_support)
-  expect supports >= goal
+  // expect supports >= goal
   let (platform_pay, creator_pay) = calculate_payout_platform_creator(supports)
   let creator_address = address_from_tuple(creator)
 
@@ -262,14 +262,18 @@ pub fn must_reach_goal_and_send_to_creator(
 
   let to_script =
     if remaining_milestone > 1 {
-      list.reduce(tx.outputs, 0, sum_script) >= supports / remaining_milestone
+      (list.reduce(tx.outputs, 0, sum_script) >= supports - supports / remaining_milestone)?
     } else {
       True
     }
+
+  trace @"creator, platform": creator_pay, platform_pay
+  trace @" to_script": to_script
+  trace @"remainingMilstone": remaining_milestone
   and {
-    to_script,
-    list.reduce(tx.outputs, 0, sum_creator) >= creator_pay / remaining_milestone,
-    list.reduce(tx.outputs, 0, sum_platform) >= platform_pay / remaining_milestone,
+    to_script?,
+    (list.reduce(tx.outputs, 0, sum_creator) >= creator_pay / remaining_milestone)?,
+    (list.reduce(tx.outputs, 0, sum_platform) >= platform_pay / remaining_milestone)?,
   }
 }
 

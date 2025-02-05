@@ -153,10 +153,6 @@ pub fn validate_release_campaign(
     // updateCampaign datum's milstone field and set one more false to true
     // and pass the updated datum to the must_update_state_token_function 
     let updated_datum = utils.updating_datum_milestone(campaign_datum)
-    trace @"is Campaign Running": utils.is_running_campaign(
-      tx.inputs,
-      self_script,
-    )
     and {
       utils.atleast_signedby(tx.extra_signatories, multisig)?,
       (!utils.is_running_campaign(tx.inputs, self_script))?,

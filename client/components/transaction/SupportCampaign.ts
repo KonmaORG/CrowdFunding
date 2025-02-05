@@ -77,14 +77,14 @@ export async function SupportCampaign(
       .readFrom([...ref_utxo, ...state_utxo])
       .collectFrom(utxoWithRewardToken, redeemer)
       .pay.ToAddress(address, {
-        lovelace: 2n,
+        lovelace: 1_500_000n,
         [rewardToken]: BigInt(supportFraction),
       })
       .pay.ToContract(
         contarctAddress,
         { kind: "inline", value: Data.to(datum, CampaignDatum) },
         {
-          lovelace: 2n,
+          lovelace: 2_000_000n,
           [rewardToken]: BigInt(rewardTokenQty - supportFraction),
         }
       )
