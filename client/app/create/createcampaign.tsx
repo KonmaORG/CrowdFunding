@@ -14,6 +14,7 @@ import { Spinner } from "@heroui/spinner";
 import {
   fromAbsolute,
   getLocalTimeZone,
+  today,
   ZonedDateTime,
 } from "@internationalized/date";
 import React, { useCallback, useEffect, useState } from "react";
@@ -59,18 +60,20 @@ export default function CreateCampaignPage() {
         paymentCredentialOf(address).hash,
         stakeCredentialOf(address).hash,
       ],
-      milestone:  new Array(numberOfMilestones).fill(false),
+      milestone: new Array(numberOfMilestones).fill(false),
       state: "Initiated",
       fraction: BigInt(fractions),
     };
-    await CreateCampaign(
-      lucid,
-      address,
-      datum,
-      description,
-    );
+    await CreateCampaign(lucid, address, datum, description);
     setIsSubmittingTx(false);
-  }, [campaignName, campaignGoal, campaignDeadline, fractions, description, numberOfMilestones]);
+  }, [
+    campaignName,
+    campaignGoal,
+    campaignDeadline,
+    fractions,
+    description,
+    numberOfMilestones,
+  ]);
 
   return (
     <>
@@ -102,7 +105,6 @@ export default function CreateCampaignPage() {
               <ModalBody>
                 {/* Campaign Name */}
                 <Input
-                  autoFocus
                   // isDisabled={isSubmittingTx}
                   label="Campaign Name"
                   placeholder="Enter campaign name"
@@ -130,7 +132,9 @@ export default function CreateCampaignPage() {
                 <DatePicker
                   hideTimeZone
                   showMonthAndYearPickers
-                  defaultValue={timeNow}
+                  granularity="minute"
+                  hourCycle={24}
+                  // defaultValue={timeNow}
                   isDisabled={isSubmittingTx}
                   label="Set Deadline"
                   minValue={timeNow}
@@ -140,20 +144,21 @@ export default function CreateCampaignPage() {
                 {/* Fractions */}
                 <div className="space-y-2">
                   <Input
-                  label="Fractions"
+                    label="Fractions"
                     id="fractions"
                     type="number"
                     value={fractions.toString()}
-                    onChange={(e) => {setFractions(Number(e.target.value))}}
+                    onChange={(e) => {
+                      setFractions(Number(e.target.value));
+                    }}
                     placeholder="Enter number of fractions"
                   />
                 </div>
 
-               
                 {/* Description */}
                 <div className="space-y-2">
                   <Textarea
-                  label="Campaign description"
+                    label="Campaign description"
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -162,9 +167,8 @@ export default function CreateCampaignPage() {
                   />
                 </div>
 
-
-                 {/* Milestones */}
-                 <div className="flex items-center justify-between gap-4">
+                {/* Milestones */}
+                <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={isMilestone}
@@ -173,21 +177,18 @@ export default function CreateCampaignPage() {
                     <Label htmlFor="milestone">Milestone</Label>
                   </div>
 
-                  
-                      <Input
-                        id="numberOfMilestones"
-                        type="number"
-                        value={numberOfMilestones.toString()}
-                        onChange={(e) =>
-                          {setNumberOfMilestones(Number(e.target.value))
-                          console.log(numberOfMilestones, "changed")
-                        }}
-                        placeholder="Enter number"
-                        className={`w-full ${isMilestone ? "" : "invisible"}`}
-                      />
-                
+                  <Input
+                    id="numberOfMilestones"
+                    type="number"
+                    value={numberOfMilestones.toString()}
+                    onChange={(e) => {
+                      setNumberOfMilestones(Number(e.target.value));
+                      console.log(numberOfMilestones, "changed");
+                    }}
+                    placeholder="Enter number"
+                    className={`w-full ${isMilestone ? "" : "invisible"}`}
+                  />
                 </div>
-
               </ModalBody>
               <ModalFooter>
                 {/* Cancel Button */}
@@ -196,7 +197,10 @@ export default function CreateCampaignPage() {
                     color="danger"
                     // isDisabled={isSubmittingTx}
                     // variant="flat"
-                    onClick={() => {onClose(); setIsSubmittingTx(false);}}
+                    onClick={() => {
+                      onClose();
+                      setIsSubmittingTx(false);
+                    }}
                   >
                     Cancel
                   </Button>
