@@ -62,6 +62,7 @@ export const CampaignStateRedeemer = {
   Running: Data.to(new Constr(1, [])),
   Cancelled: Data.to(new Constr(2, [])),
   Finished: Data.to(new Constr(3, [])),
+  Released: Data.to(new Constr(4, [])),
 };
 
 // export type CampaignState = Data.Static<typeof CampaignStateSchema>;

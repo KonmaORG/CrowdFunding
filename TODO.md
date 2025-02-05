@@ -71,6 +71,5 @@ FINISH
 /// Fraction can't be fraction
 /// Goal can't be fraction
 
- <!-- supoort fucn updated  -->
-<!-- need to ccrate campaign ,
-check supoort cmapaign is wokringor not -->
+<!--  Multisig Finish Campaign-->
+<!-- Cancel Campaign -->

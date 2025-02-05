@@ -21,6 +21,7 @@ import { CampaignModal } from "./campaignModal";
 import { FinishCampaign } from "./transaction/FininshCampaign";
 import { useWallet } from "@/context/walletContext";
 import { ApproveCampaign } from "./transaction/ApproveCampaign";
+import { ReleaseFunds } from "./transaction/ReleaseFunds";
 
 interface TokenCardProps {
   token: string;
@@ -52,6 +53,11 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
   const handleFinish = async () => {
     if (!metadata) return;
     FinishCampaign(WalletConnection, datum, metadata);
+  };
+
+  const handleRelease = async () => {
+    if (!metadata) return;
+    ReleaseFunds(WalletConnection, datum, metadata);
   };
 
   const imageUrl = metadata?.image.replace("ipfs://", "https://ipfs.io/ipfs/");
@@ -87,7 +93,7 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
             Goal: {toAda(datum.goal)}
           </div>
         </CardContent>
-        <CardFooter className="flex items-center justify-between space-x-2 p-2">
+        <CardFooter className="flex items-center justify-evenly p-2 flex-wrap gap-2">
           <Button className="h-8 text-sm px-4" onClick={handleApprove}>
             Approve
           </Button>
@@ -96,6 +102,9 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
           </Button>
           <Button className="h-8 text-sm px-4" onClick={handleFinish}>
             Finish
+          </Button>
+          <Button className="h-8 text-sm px-4" onClick={handleRelease}>
+            Release
           </Button>
         </CardFooter>
         <CampaignModal

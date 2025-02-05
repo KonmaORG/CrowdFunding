@@ -10,8 +10,8 @@ use cardano/transaction.{
 }
 use config
 use crowdfunding/types.{
-  BackerDatum, CampaignDatum, ConfigDatum, Multisig, PaymentKeyHash, Running,
-  StakeKeyHash,
+  BackerDatum, CampaignDatum, ConfigDatum, Milestone, Multisig, PaymentKeyHash,
+  Running, StakeKeyHash,
 }
 use test_kit/time/unwrap
 
@@ -118,9 +118,9 @@ pub fn must_update_state_token(
   when datum is {
     // STATE token to state_token addr or self_script if state is not running
     InlineDatum(output_datum) -> and {
-        (assets.quantity_of(value, self_script, config.state_token) == 1)?,
-        (address == state_token_address)?,
-        (output_datum == with_datum_data)?,
+        assets.quantity_of(value, self_script, config.state_token) == 1,
+        address == state_token_address,
+        output_datum == with_datum_data,
       }
 
     // REWARD token to self script addr
@@ -146,12 +146,12 @@ pub fn is_running_campaign(
 
 pub fn must_be_signed_by(tx: Transaction, signer: VerificationKeyHash) -> Bool {
   // just expect 1 signer
-  ([signer] == tx.extra_signatories)?
+  [signer] == tx.extra_signatories
 }
 
 pub fn must_be_after_deadline(tx: Transaction, deadline: Int) -> Bool {
   // tx validFrom is after or at deadline
-  (unwrap.finite_start_of(tx.validity_range) >= deadline)?
+  unwrap.finite_start_of(tx.validity_range) >= deadline
 }
 
 pub fn must_refund(
@@ -212,7 +212,7 @@ pub fn must_reach_goal_and_send_to_creator(
       if address == self_address {
         when datum is {
           InlineDatum(input_datum) ->
-            if input_datum is BackerDatum {
+            if input_datum is CampaignDatum {
               assets.lovelace_of(value) + sum
             } else {
               sum
@@ -223,7 +223,6 @@ pub fn must_reach_goal_and_send_to_creator(
         sum
       }
     }
-  // backer supports must reach goal (sum_support >= goal)?
   let supports = tx.inputs |> list.reduce(0, sum_support)
   expect supports >= goal
   let (platform_pay, creator_pay) = calculate_payout_platform_creator(supports)
@@ -251,8 +250,24 @@ pub fn must_reach_goal_and_send_to_creator(
         _ -> sum
       }
     }
-  // creator must receive backer supports (sum_creator >= sum_support)?
+
+  let sum_script =
+    fn(sum, Output { address, value, .. }) {
+      if address == self_address {
+        assets.lovelace_of(value) + sum
+      } else {
+        sum
+      }
+    }
+
+  let to_script =
+    if remaining_milestone > 1 {
+      list.reduce(tx.outputs, 0, sum_script) >= supports / remaining_milestone
+    } else {
+      True
+    }
   and {
+    to_script,
     list.reduce(tx.outputs, 0, sum_creator) >= creator_pay / remaining_milestone,
     list.reduce(tx.outputs, 0, sum_platform) >= platform_pay / remaining_milestone,
   }
@@ -302,7 +317,7 @@ pub fn atleast_signedby(
   atleast_signatories: Multisig,
 ) -> Bool {
   let Multisig { required, signers } = atleast_signatories
-  (required <= list.count(signers, fn(signer) { list.has(signatories, signer) }))?
+  required <= list.count(signers, fn(signer) { list.has(signatories, signer) })
 }
 
 pub fn ref_inputs_to_config_datum(
@@ -336,9 +351,9 @@ pub fn must_send_state_token(
   when datum is {
     // STATE token to state_token addr or self_script if state is not running
     InlineDatum(output_datum) -> and {
-        address == self_address,
-        output_datum == with_datum_data,
-        assets.match(value, self_input.output.value, >=),
+        (address == self_address)?,
+        (output_datum == with_datum_data)?,
+        assets.match(value, self_input.output.value, >=)?,
       }
 
     _ -> False
@@ -347,10 +362,7 @@ pub fn must_send_state_token(
 
 pub fn must_happen_before(range: ValidityRange, lock_expiration_time: Int) {
   when range.lower_bound.bound_type is {
-    Finite(tx_latest_time) -> {
-      trace @"time": tx_latest_time
-      lock_expiration_time >= tx_latest_time
-    }
+    Finite(tx_latest_time) -> lock_expiration_time >= tx_latest_time
     _ -> False
   }
 }
@@ -400,7 +412,6 @@ pub fn must_pay_to_script(
       }
     }
   let supports = tx.inputs |> list.reduce(0, sum_support)
-  trace @"supports": supports
   list.any(
     tx.outputs,
     fn(o) {
@@ -413,11 +424,29 @@ pub fn must_pay_to_script(
         _ -> False
       }
     },
-  )?
+  )
 }
 
 pub fn must_burn_reward_token(tx: Transaction, self_script: PolicyId) {
   expect [Pair(_, qty)] =
     tx.mint |> assets.tokens(self_script) |> dict.to_pairs()
   qty < 0
+}
+
+pub fn updating_datum_milestone(datum: CampaignDatum) -> CampaignDatum {
+  let milestones: Milestone = datum.milestone
+  expect Some(index) = list.index_of(milestones, False)
+  let updated_milestones =
+    list.indexed_map(
+      milestones,
+      fn(i, m) {
+        if i == index {
+          !m
+        } else {
+          m
+        }
+      },
+    )
+
+  CampaignDatum { ..datum, milestone: updated_milestones }
 }

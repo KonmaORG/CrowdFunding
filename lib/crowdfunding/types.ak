@@ -12,6 +12,7 @@ pub type CampaignState {
   Running
   Cancelled
   Finished
+  Released
 }
 
 pub type Milestone =

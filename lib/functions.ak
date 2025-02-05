@@ -112,26 +112,26 @@ pub fn validate_finish_campaign(
   if current_datum is campaign_datum: CampaignDatum {
     // platform can only finish after deadline, creator can finish early whevener the goal is reached
     let is_signed_by_platform =
-      utils.atleast_signedby(tx.extra_signatories, multisig)?
+      utils.atleast_signedby(tx.extra_signatories, multisig)
     and {
       if is_signed_by_platform {
-        utils.must_be_after_deadline(tx, campaign_datum.deadline)?
+        utils.must_be_after_deadline(tx, campaign_datum.deadline)
       } else {
-        utils.must_be_signed_by(tx, campaign_datum.creator.1st)?
+        utils.must_be_signed_by(tx, campaign_datum.creator.1st)
       },
-      utils.is_running_campaign(tx.inputs, self_script)?,
+      utils.is_running_campaign(tx.inputs, self_script),
       utils.must_update_state_token(
         tx,
         self_script,
         state_token_script,
         with_datum: CampaignDatum { ..campaign_datum, state: Finished },
-      )?,
+      ),
       utils.must_pay_to_script(
         tx,
         self_script,
         campaign_datum: CampaignDatum { ..campaign_datum, state: Finished },
-      )?,
-      utils.must_burn_reward_token(tx, self_script)?,
+      ),
+      utils.must_burn_reward_token(tx, self_script),
     }
   } else if current_datum is BackerDatum {
     // must consume state token UTxO successfully
@@ -150,15 +150,21 @@ pub fn validate_release_campaign(
   multisig: Multisig,
 ) -> Bool {
   if current_datum is campaign_datum: CampaignDatum {
-    // platform can only finish after deadline, creator can finish early whevener the goal is reached
+    // updateCampaign datum's milstone field and set one more false to true
+    // and pass the updated datum to the must_update_state_token_function 
+    let updated_datum = utils.updating_datum_milestone(campaign_datum)
+    trace @"is Campaign Running": utils.is_running_campaign(
+      tx.inputs,
+      self_script,
+    )
     and {
-      utils.atleast_signedby(tx.extra_signatories, multisig),
-      !utils.is_running_campaign(tx.inputs, self_script)?,
-      utils.must_send_state_reward_token(
+      utils.atleast_signedby(tx.extra_signatories, multisig)?,
+      (!utils.is_running_campaign(tx.inputs, self_script))?,
+      utils.must_update_state_token(
         tx,
         self_script,
         state_token_script,
-        with_datum: CampaignDatum { ..campaign_datum, state: Finished },
+        updated_datum,
       )?,
       utils.must_reach_goal_and_send_to_creator(
         tx,
