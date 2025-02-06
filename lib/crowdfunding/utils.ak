@@ -262,18 +262,15 @@ pub fn must_reach_goal_and_send_to_creator(
 
   let to_script =
     if remaining_milestone > 1 {
-      (list.reduce(tx.outputs, 0, sum_script) >= supports - supports / remaining_milestone)?
+      list.reduce(tx.outputs, 0, sum_script) >= supports - supports / remaining_milestone
     } else {
       True
     }
 
-  trace @"creator, platform": creator_pay, platform_pay
-  trace @" to_script": to_script
-  trace @"remainingMilstone": remaining_milestone
   and {
-    to_script?,
-    (list.reduce(tx.outputs, 0, sum_creator) >= creator_pay / remaining_milestone)?,
-    (list.reduce(tx.outputs, 0, sum_platform) >= platform_pay / remaining_milestone)?,
+    to_script,
+    list.reduce(tx.outputs, 0, sum_creator) >= creator_pay / remaining_milestone,
+    list.reduce(tx.outputs, 0, sum_platform) >= platform_pay / remaining_milestone,
   }
 }
 
@@ -355,9 +352,9 @@ pub fn must_send_state_token(
   when datum is {
     // STATE token to state_token addr or self_script if state is not running
     InlineDatum(output_datum) -> and {
-        (address == self_address)?,
-        (output_datum == with_datum_data)?,
-        assets.match(value, self_input.output.value, >=)?,
+        address == self_address,
+        output_datum == with_datum_data,
+        assets.match(value, self_input.output.value, >=),
       }
 
     _ -> False

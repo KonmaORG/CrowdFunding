@@ -79,11 +79,11 @@ pub fn validate_cancel_campaign(
     utils.atleast_signedby(tx.extra_signatories, multisig)
   and {
     if is_signed_by_platform? {
-      utils.must_be_after_deadline(tx, campaign_datum.deadline)?
+      utils.must_be_after_deadline(tx, campaign_datum.deadline)
     } else {
-      utils.must_be_signed_by(tx, campaign_datum.creator.1st)?
+      utils.must_be_signed_by(tx, campaign_datum.creator.1st)
     },
-    utils.is_running_campaign(tx.inputs, self_script)?,
+    utils.is_running_campaign(tx.inputs, self_script),
     utils.must_send_state_reward_token(
       tx,
       self_script,
@@ -99,7 +99,7 @@ pub fn validate_refund_support(
   backer_datum: BackerDatum,
 ) -> Bool {
   and {
-    utils.is_campaign_cancelled(tx.outputs, self_script)?,
+    utils.is_campaign_cancelled(tx.outputs, self_script),
     utils.must_refund(tx, self_script, backer_datum)?,
   }
 }
