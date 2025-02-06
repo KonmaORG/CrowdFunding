@@ -133,29 +133,29 @@ export const blockfrost = {
     const url = `${BF_URL}/assets/${asset}`;
 
     try {
-      // const assetResponse = await fetch(url, {
-      //   method: "GET",
-      //   headers: {
-      //     project_id: BF_PID,
-      //   },
-      // });
+      const assetResponse = await fetch(url, {
+        method: "GET",
+        headers: {
+          project_id: BF_PID,
+        },
+      });
 
-      // if (!assetResponse.ok) {
-      //   throw new Error(`Error: ${assetResponse.statusText}`);
-      // }
+      if (!assetResponse.ok) {
+        throw new Error(`Error: ${assetResponse.statusText}`);
+      }
 
-      // const result = await assetResponse.json();
-      // return result.onchain_metadata;
-      return {
-        name: "STATE_TOKEN",
-        campaignName: "bc",
-        image: "https://avatars.githubusercontent.com/u/106166350",
-        description: "",
-        hash: "d369efbf14439f0e0f335b7da988fae179d7eb07de3482c6a4b4ded44946b807",
-        outputIndex: 1,
-        address:
-          "addr_test1wqupdmtz5gpg0kt28nyeu5sw2x8gfe5s7q5aenjnhmf47cqw2frc7",
-      };
+      const result = await assetResponse.json();
+      return result.onchain_metadata;
+      // return {
+      //   name: "STATE_TOKEN",
+      //   campaignName: "bc",
+      //   image: "https://avatars.githubusercontent.com/u/106166350",
+      //   description: "",
+      //   hash: "d369efbf14439f0e0f335b7da988fae179d7eb07de3482c6a4b4ded44946b807",
+      //   outputIndex: 1,
+      //   address:
+      //     "addr_test1wqupdmtz5gpg0kt28nyeu5sw2x8gfe5s7q5aenjnhmf47cqw2frc7",
+      // };
     } catch (err: any) {
       return err.message;
     }
