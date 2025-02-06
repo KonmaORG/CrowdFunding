@@ -5,7 +5,7 @@ import {
   CrowdfundingValidator,
   StateTokenValidator,
 } from "@/config/scripts/scripts";
-import { FindRefUtxo, getAddress, submit } from "@/lib/utils";
+import { blockfrost, FindRefUtxo, getAddress, submit } from "@/lib/utils";
 import {
   CampaignActionRedeemer,
   CampaignDatum,
@@ -66,7 +66,7 @@ export async function FinishCampaign(
     const state_utxo = await lucid.utxosAtWithUnit(state_addr, stateTokenKey);
     // ref_utxo
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
-
+    const date = await blockfrost.getLatestTime();
     const tx = await lucid
       .newTx()
       .readFrom(ref_utxo)
@@ -86,6 +86,7 @@ export async function FinishCampaign(
       .attach.SpendingValidator(Campaign_Validator)
       .attach.SpendingValidator(StateTokenValidator())
       .addSigner(address)
+      .validFrom(date)
       .complete();
 
     submit(tx);
