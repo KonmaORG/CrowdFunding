@@ -22,6 +22,7 @@ import { FinishCampaign } from "./transaction/FininshCampaign";
 import { useWallet } from "@/context/walletContext";
 import { ApproveCampaign } from "./transaction/ApproveCampaign";
 import { ReleaseFunds } from "./transaction/ReleaseFunds";
+import { CancelCampaign } from "./transaction/CancelCampaign";
 
 interface TokenCardProps {
   token: string;
@@ -58,6 +59,11 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
   const handleRelease = async () => {
     if (!metadata) return;
     ReleaseFunds(WalletConnection, datum, metadata);
+  };
+
+  const handleCancel = async () => {
+    if (!metadata) return;
+    CancelCampaign(WalletConnection, datum, metadata);
   };
 
   const imageUrl = metadata?.image.replace("ipfs://", "https://ipfs.io/ipfs/");
@@ -105,6 +111,9 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
           </Button>
           <Button className="h-8 text-sm px-4" onClick={handleRelease}>
             Release
+          </Button>
+          <Button className="h-8 text-sm px-4" onClick={handleCancel}>
+            Cancel
           </Button>
         </CardFooter>
         <CampaignModal

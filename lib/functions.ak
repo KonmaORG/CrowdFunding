@@ -98,8 +98,10 @@ pub fn validate_refund_support(
   self_script: PolicyId,
   backer_datum: BackerDatum,
 ) -> Bool {
-  expect !utils.is_running_campaign(tx.reference_inputs, self_script)
-  utils.must_refund(tx, self_script, backer_datum)?
+  and {
+    utils.is_campaign_cancelled(tx.outputs, self_script)?,
+    utils.must_refund(tx, self_script, backer_datum)?,
+  }
 }
 
 pub fn validate_finish_campaign(

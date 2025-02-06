@@ -1,8 +1,10 @@
 import { BF_PID, BF_URL, IdetificationPID, NETWORK, PROVIDER } from "@/config";
 import { CampaignDatum } from "@/types/cardano";
 import {
+  credentialToAddress,
   Data,
   fromText,
+  keyHashToCredential,
   LucidEvolution,
   makeWalletFromPrivateKey,
   MintingPolicy,
@@ -119,6 +121,13 @@ export function toLovelace(value: number) {
   return BigInt(value * 1_000_000);
 }
 
+export function tupleToAddress(tuple: [string, string]) {
+  const pc = keyHashToCredential(tuple[0]);
+  const sc = keyHashToCredential(tuple[1]);
+  const address = credentialToAddress(NETWORK, pc, sc);
+  return address;
+}
+
 export const blockfrost = {
   getMetadata: async (asset: string) => {
     const url = `${BF_URL}/assets/${asset}`;
@@ -139,13 +148,13 @@ export const blockfrost = {
       // return result.onchain_metadata;
       return {
         name: "STATE_TOKEN",
-        campaignName: "ab",
+        campaignName: "abbb",
         image: "https://avatars.githubusercontent.com/u/106166350",
         description: "",
-        hash: "b5637127f76355307ba3f86aed3b235f3eef18a1ffeded3ed4680fc42293eb6d",
+        hash: "353f0814676ebf31dfd2f77b647f163bc624b31d6beb7ad1d635591ecd7b046e",
         outputIndex: 1,
         address:
-          "addr_test1wzhv3mz09nc4zm00f5lvw9se2g6048v7hs0qj9s43u7s2esaf8ey2",
+          "addr_test1wr78muu36jzrp845f7mauxuzt8g6sdkp8c8zy3hqzs5f7wcsletyq",
       };
     } catch (err: any) {
       return err.message;

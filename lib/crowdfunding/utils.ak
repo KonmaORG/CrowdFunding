@@ -10,8 +10,8 @@ use cardano/transaction.{
 }
 use config
 use crowdfunding/types.{
-  BackerDatum, CampaignDatum, ConfigDatum, Milestone, Multisig, PaymentKeyHash,
-  Running, StakeKeyHash,
+  BackerDatum, CampaignDatum, Cancelled, ConfigDatum, Milestone, Multisig,
+  PaymentKeyHash, Running, StakeKeyHash,
 }
 use test_kit/time/unwrap
 
@@ -453,4 +453,16 @@ pub fn updating_datum_milestone(datum: CampaignDatum) -> CampaignDatum {
     )
 
   CampaignDatum { ..datum, milestone: updated_milestones }
+}
+
+pub fn is_campaign_cancelled(outputs: List<Output>, self_script: PolicyId) {
+  expect Some(Output { datum, .. }) = {
+    let output <- list.find(outputs)
+    assets.quantity_of(output.value, self_script, config.state_token) == 1
+  }
+
+  // must be campaign inline datum
+  expect InlineDatum(campaign_datum) = datum
+  expect CampaignDatum { state, .. } = campaign_datum
+  state == Cancelled
 }
