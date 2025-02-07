@@ -13,7 +13,8 @@ use crowdfunding/types.{
   BackerDatum, CampaignDatum, Cancelled, ConfigDatum, Milestone, Multisig,
   PaymentKeyHash, Running, StakeKeyHash,
 }
-use test_kit/time/unwrap
+
+// use test_kit/time/unwrap
 
 pub fn script_address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
   let (pkh, skh) = key_hash_tuple
@@ -149,9 +150,12 @@ pub fn must_be_signed_by(tx: Transaction, signer: VerificationKeyHash) -> Bool {
   [signer] == tx.extra_signatories
 }
 
-pub fn must_be_after_deadline(tx: Transaction, deadline: Int) -> Bool {
+pub fn must_be_after_deadline(
+  validity_range: ValidityRange,
+  deadline: Int,
+) -> Bool {
   // tx validFrom is after or at deadline
-  unwrap.finite_start_of(tx.validity_range) >= deadline
+  !must_happen_before(validity_range, deadline)
 }
 
 pub fn must_refund(
@@ -202,7 +206,7 @@ pub fn must_reach_goal_and_send_to_creator(
   campaign_datum: CampaignDatum,
   platform: VerificationKeyHash,
 ) {
-  let CampaignDatum { goal, creator, milestone, .. } = campaign_datum
+  let CampaignDatum { creator, milestone, .. } = campaign_datum
   let remaining_milestone = list.count(milestone, fn(m) { m == False })
   let self_address = Address(Script(self_script), None)
 

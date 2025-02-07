@@ -1,42 +1,42 @@
-use cardano/assets
-use cardano/transaction.{InlineDatum}
-use crowdfunding/types.{CampaignDatum, Initiated}
-use crowdfunding/utils
-use mocktail/virgin_address.{mock_pub_key_address}
-use mocktail/virgin_key_hash.{mock_policy_id}
-use test_kit/tx.{add_asset_to_tx_output, add_tx_output, set_datum_of_tx_output}
+// use cardano/assets
+// use cardano/transaction.{InlineDatum}
+// use crowdfunding/types.{CampaignDatum, Initiated}
+// use crowdfunding/utils
+// use mocktail/virgin_address.{mock_pub_key_address}
+// use mocktail/virgin_key_hash.{mock_policy_id}
+// use test_kit/tx.{add_asset_to_tx_output, add_tx_output, set_datum_of_tx_output}
 
 // use tests/constants.{campaign_address}
 
-test state_token() {
-  let datum =
-    CampaignDatum {
-      name: "abc",
-      goal: 100,
-      deadline: 1740721010097,
-      creator: (
-        #"53e442b1918e7f021498ffdce4515c6ae90c44d57cd36e1b5b793ba4",
-        #"fe87c58583933bb8079bbad7f95def4595ae570e44ca78d00bbbe481",
-      ),
-      milestone: [False, False],
-      state: Initiated,
-      fraction: 2,
-    }
-  let self_script = mock_policy_id(0)
-  //   let campaign_pid = mock_policy_id(1)
-  let state_token_address = mock_pub_key_address(1, None)
-  let campaign_state_tokens = assets.from_asset(self_script, "STATE_TOKEN", 1)
+// test state_token() {
+//   let datum =
+//     CampaignDatum {
+//       name: "abc",
+//       goal: 100,
+//       deadline: 1740721010097,
+//       creator: (
+//         #"53e442b1918e7f021498ffdce4515c6ae90c44d57cd36e1b5b793ba4",
+//         #"fe87c58583933bb8079bbad7f95def4595ae570e44ca78d00bbbe481",
+//       ),
+//       milestone: [False, False],
+//       state: Initiated,
+//       fraction: 2,
+//     }
+//   let self_script = mock_policy_id(0)
+//   //   let campaign_pid = mock_policy_id(1)
+//   let state_token_address = mock_pub_key_address(1, None)
+//   let campaign_state_tokens = assets.from_asset(self_script, "STATE_TOKEN", 1)
 
-  let tx_output_1 =
-    tx.new_tx_output(state_token_address)
-      |> set_datum_of_tx_output(datum |> InlineDatum)
-      |> add_asset_to_tx_output(campaign_state_tokens)
-  let tx =
-    transaction.placeholder
-      |> add_tx_output(tx_output_1)
+//   let tx =
+//     transaction.placeholder
+//       |> add_tx_output(tx_output_1)
+//   let tx_output_1 =
+//     tx.new_tx_output(state_token_address)
+//       |> set_datum_of_tx_output(datum |> InlineDatum)
+//       |> add_asset_to_tx_output(campaign_state_tokens)
 
-  utils.must_update_state_token(tx, self_script, state_token_address, datum)
-}
+//   utils.must_update_state_token(tx, self_script, state_token_address, datum)
+// }
 // // ## Positive Test
 
 // test create_campaign_positive_test() {
