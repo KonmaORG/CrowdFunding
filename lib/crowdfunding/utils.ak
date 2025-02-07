@@ -436,8 +436,12 @@ pub fn must_pay_to_script(
 }
 
 pub fn must_burn_reward_token(tx: Transaction, self_script: PolicyId) {
-  expect [Pair(_, qty)] =
-    tx.mint |> assets.tokens(self_script) |> dict.to_pairs()
+  let qty =
+    when tx.mint |> assets.tokens(self_script) |> dict.to_pairs() is {
+      [Pair(_, q)] -> q
+      [] -> -1
+      _ -> fail
+    }
   qty < 0
 }
 

@@ -67,7 +67,7 @@ export async function FinishCampaign(
     // ref_utxo
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
     const date = await blockfrost.getLatestTime();
-    const tx = await lucid
+    let newTx = lucid
       .newTx()
       .readFrom(ref_utxo)
       .collectFrom(utxos, redeemer)
@@ -82,13 +82,18 @@ export async function FinishCampaign(
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
         { lovelace: lovelace }
       )
-      .mintAssets(rewardTokenBurn, Data.to(updatedDatum, CampaignDatum))
       .attach.SpendingValidator(Campaign_Validator)
       .attach.SpendingValidator(StateTokenValidator())
       .addSigner(address)
-      .validFrom(date)
-      .complete();
+      .validFrom(date);
 
+    if (rewardToken > 0) {
+      newTx = newTx.mintAssets(
+        rewardTokenBurn,
+        Data.to(updatedDatum, CampaignDatum)
+      );
+    }
+    const tx = await newTx.complete();
     submit(tx);
   } catch (error) {
     console.log(error);
