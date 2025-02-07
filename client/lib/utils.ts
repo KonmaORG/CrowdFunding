@@ -133,28 +133,28 @@ export const blockfrost = {
     const url = `${BF_URL}/assets/${asset}`;
 
     try {
-      // const assetResponse = await fetch(url, {
-      //   method: "GET",
-      //   headers: {
-      //     project_id: BF_PID,
-      //   },
-      // });
+      const assetResponse = await fetch(url, {
+        method: "GET",
+        headers: {
+          project_id: BF_PID,
+        },
+      });
 
-      // if (!assetResponse.ok) {
-      //   throw new Error(`Error: ${assetResponse.statusText}`);
-      // }
+      if (!assetResponse.ok) {
+        throw new Error(`Error: ${assetResponse.statusText}`);
+      }
 
-      // const result = await assetResponse.json();
-      // return result.onchain_metadata;
+      const result = await assetResponse.json();
+      return result.onchain_metadata;
       return {
         name: "STATE_TOKEN",
-        campaignName: "with mile cancel 1",
+        campaignName: "cancel",
         image: "https://avatars.githubusercontent.com/u/106166350",
         description: "",
-        hash: "bf999e6fd847353eafdda16f75f3019f3ef1843251be23663c92b8dbf5c087ae",
-        outputIndex: 0,
+        hash: "9b32a2befc9ddff4d6004d7192e7c249c65e1be15bd6ea2ed5e9885590aefe4a",
+        outputIndex: 1,
         address:
-          "addr_test1wp9hygz5xcp3hlvg8q3v6hexrv5699eqren2pxvve4tltjsfl9e7q",
+          "addr_test1wq2z2mu727sdse7ppycy3un8hxwl8mtkjxrz8t8gf4aac4swa3p8e",
       };
     } catch (err: any) {
       return err.message;

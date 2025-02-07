@@ -36,7 +36,6 @@ export function TokenCard({ token, qty, datum }: TokenCardProps) {
   const [WalletConnection] = useWallet();
 
   useEffect(() => {
-    console.log(datum);
     async function fetchData() {
       const result = await blockfrost.getMetadata(token);
       setMetadata(result);

@@ -47,12 +47,14 @@ export async function CancelCampaign(
     const state_addr = getAddress(StateTokenValidator);
     // tokens
     const stateTokenKey = policyId + fromText("STATE_TOKEN");
+    const rewardTokenKey = `${policyId}${datum.name}`;
     // utxos
     const campaignUtxos = await lucid.utxosAt(contarctAddress);
     const state_utxo = await lucid.utxosAtWithUnit(state_addr, stateTokenKey);
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
     // Backer UTXOS
     const backerSupport = await backerUtxo(lucid, campaignUtxos);
+    const { rewardToken } = sumUtxoAmounts(campaignUtxos, rewardTokenKey);
     // Datum & Redeemer
     const updatedDatum: CampaignDatum = {
       ...datum,
@@ -77,7 +79,13 @@ export async function CancelCampaign(
         lovelace: lovelace,
       });
     }
-    const tx = await newTx.complete({ localUPLCEval: false });
+    if (rewardToken > 0n) {
+      newTx = newTx.mintAssets(
+        { [rewardTokenKey]: -rewardToken },
+        Data.to(updatedDatum, CampaignDatum)
+      );
+    }
+    const tx = await newTx.complete();
 
     submit(tx);
   } catch (error: any) {
@@ -138,4 +146,16 @@ async function backerUtxo(lucid: LucidEvolution, utxos: UTxO[]) {
     }
   }
   return Array.from(resultMap.values());
+}
+
+function sumUtxoAmounts(utxos: UTxO[], rewardTokenKey: string) {
+  return utxos.reduce(
+    (acc, utxo) => {
+      const assets = utxo.assets || {};
+      acc.lovelace += assets.lovelace || 0n;
+      acc.rewardToken += assets[rewardTokenKey] || 0n;
+      return acc;
+    },
+    { lovelace: 0n, rewardToken: 0n }
+  );
 }

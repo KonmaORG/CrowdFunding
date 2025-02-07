@@ -46,8 +46,8 @@ pub fn validate_create_campaign(
 
 pub fn validate_support_campaign(
   tx: Transaction,
-  datum: CampaignDatum,
   self_script: PolicyId,
+  datum: CampaignDatum,
 ) {
   let Transaction { outputs, reference_inputs, .. } = tx
   let CampaignDatum { name, goal, fraction, .. } = datum
@@ -74,6 +74,7 @@ pub fn validate_cancel_campaign(
   multisig: Multisig,
   state_token_script: Address,
 ) -> Bool {
+  trace @"calling cancel function"
   // platform can only cancel after deadline, creator can cancel at anytime
   let is_signed_by_platform =
     utils.atleast_signedby(tx.extra_signatories, multisig)
@@ -84,7 +85,7 @@ pub fn validate_cancel_campaign(
       utils.must_be_signed_by(tx, campaign_datum.creator.1st)
     },
     utils.is_running_campaign(tx.inputs, self_script),
-    utils.must_send_state_reward_token(
+    utils.must_update_state_token(
       tx,
       self_script,
       state_token_script,
@@ -99,6 +100,7 @@ pub fn validate_refund_support(
   backer_datum: BackerDatum,
 ) -> Bool {
   and {
+    trace @"calling refund function"
     utils.is_campaign_cancelled(tx.outputs, self_script),
     utils.must_refund(tx, self_script, backer_datum)?,
   }

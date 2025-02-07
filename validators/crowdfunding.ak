@@ -3,8 +3,8 @@ use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Input, Output, OutputReference, Transaction}
 use crowdfunding/types.{
-  BackerDatum, CampaignAction, CampaignDatum, Cancel, ConfigDatum, Finish,
-  Finished, Refund, Release, Support,
+  BackerDatum, CampaignAction, CampaignDatum, Cancel, Cancelled, ConfigDatum,
+  Finish, Finished, Refund, Release, Running, Support,
 }
 use crowdfunding/utils
 use functions.{
@@ -23,7 +23,7 @@ validator campaign(
     tx: Transaction,
   ) {
     when campaign_datum.state is {
-      Finished -> utils.must_burn_reward_token(tx, self_script)
+      Finished | Cancelled -> utils.must_burn_reward_token(tx, self_script)
       _ -> {
         let ConfigDatum { state_token_script, .. } =
           utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
@@ -54,7 +54,11 @@ validator campaign(
       // Support campaign:
       (Some(current_datum), Support) ->
         if current_datum is campaign_datum: CampaignDatum {
-          validate_support_campaign(tx, campaign_datum, self_script)
+          validate_support_campaign(
+            tx,
+            self_script,
+            datum: CampaignDatum { ..campaign_datum, state: Running },
+          )
         } else {
           fail @"Invalid Cancel Datum Type! Must be CampaignDatum"
         }
