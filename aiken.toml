@@ -21,11 +21,6 @@ version = "2.1.0"
 source = "github"
 
 [[dependencies]]
-name = "aiken-extra/test_kit"
-version = "helium"
-source = "github"
-
-[[dependencies]]
 name = "sidan-lab/vodka"
 version = "0.1.6"
 source = "github"

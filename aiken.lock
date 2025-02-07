@@ -12,11 +12,6 @@ version = "2.1.0"
 source = "github"
 
 [[requirements]]
-name = "aiken-extra/test_kit"
-version = "helium"
-source = "github"
-
-[[requirements]]
 name = "sidan-lab/vodka"
 version = "0.1.6"
 source = "github"
@@ -39,12 +34,6 @@ requirements = []
 source = "github"
 
 [[packages]]
-name = "aiken-extra/test_kit"
-version = "helium"
-requirements = []
-source = "github"
-
-[[packages]]
 name = "sidan-lab/vodka"
 version = "0.1.6"
 requirements = []
@@ -57,4 +46,3 @@ requirements = []
 source = "github"
 
 [etags]
-"aiken-extra/test_kit@helium" = [{ secs_since_epoch = 1738900120, nanos_since_epoch = 895980600 }, "8aeaede15f69f88f8eacc139d29696e0d7860b0e198debb21cdf082234d49d56"]
