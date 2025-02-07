@@ -73,3 +73,8 @@ FINISH
 
 <!--  Multisig Finish Campaign-->
 <!-- Cancel Campaign -->
+
+TEST CANCEL functionality with
+
+- no reward token left in script
+- some reward token left in scrtip
