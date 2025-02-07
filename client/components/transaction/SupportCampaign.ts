@@ -72,29 +72,40 @@ export async function SupportCampaign(
     const state_addr = getAddress(StateTokenValidator);
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
     const state_utxo = await lucid.utxosAtWithUnit(state_addr, stateToken);
-    const tx = await lucid
+    let newTx = lucid
       .newTx()
       .readFrom([...ref_utxo, ...state_utxo])
       .collectFrom(utxoWithRewardToken, redeemer)
       .pay.ToAddress(address, {
-        lovelace: 1_500_000n,
+        lovelace: 1n,
         [rewardToken]: BigInt(supportFraction),
       })
-      .pay.ToContract(
+      .attach.SpendingValidator(Campaign_Validator);
+
+    if (rewardTokenQty - supportFraction > 0) {
+      newTx = newTx.pay.ToContract(
         contarctAddress,
         { kind: "inline", value: Data.to(datum, CampaignDatum) },
         {
           lovelace: 2_000_000n,
           [rewardToken]: BigInt(rewardTokenQty - supportFraction),
         }
-      )
-      .pay.ToContract(
+      );
+    } else {
+      newTx = newTx.pay.ToContract(
+        contarctAddress,
+        { kind: "inline", value: Data.to(datum, CampaignDatum) },
+        { lovelace: 2_000_000n }
+      );
+    }
+    const tx = await newTx.pay
+      .ToContract(
         contarctAddress,
         { kind: "inline", value: Data.to(backerDatum, BackerDatum) },
         { lovelace: payToContract }
       )
-      .attach.SpendingValidator(Campaign_Validator)
       .complete();
+
     submit(tx);
 
     return { data: tx, error: null };

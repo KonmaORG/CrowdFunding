@@ -279,8 +279,7 @@ pub fn find_output_from_PID(
   policy_id: PolicyId,
   name: ByteArray,
 ) {
-  expect [supporter_output,
-    script_output] =
+  let token_output: List<Output> =
     list.filter(
       outputs,
       fn(output) {
@@ -288,9 +287,17 @@ pub fn find_output_from_PID(
         !dict.is_empty(has_reward_token)
       },
     )
+
+  expect Some(supporter_output) = list.at(token_output, 0)
+  let script_token =
+    when list.at(token_output, 1) is {
+      Some(script_output) ->
+        assets.quantity_of(script_output.value, policy_id, name)
+      None -> 0
+    }
   let reward_token_to_backer =
     assets.quantity_of(supporter_output.value, policy_id, name)
-  let script_token = assets.quantity_of(script_output.value, policy_id, name)
+  // let script_token = assets.quantity_of(script_output.value, policy_id, name)
   (reward_token_to_backer, script_token)
 }
 
