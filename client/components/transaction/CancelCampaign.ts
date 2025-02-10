@@ -25,7 +25,7 @@ import { FindRefUtxo, getAddress, submit, tupleToAddress } from "@/lib/utils";
 export async function CancelCampaign(
   WalletConnection: WalletConnection,
   datum: CampaignDatum,
-  metadata: MetadataType
+  metadata: MetadataType,
 ) {
   const { address, lucid } = WalletConnection;
   try {
@@ -68,7 +68,7 @@ export async function CancelCampaign(
       .pay.ToContract(
         state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
-        { lovelace: 2_000_000n, [stateTokenKey]: 1n }
+        { lovelace: 2_000_000n, [stateTokenKey]: 1n },
       )
       .attach.SpendingValidator(Campaign_Validator)
       .attach.SpendingValidator(StateTokenValidator())
@@ -82,7 +82,7 @@ export async function CancelCampaign(
     if (rewardToken > 0n) {
       newTx = newTx.mintAssets(
         { [rewardTokenKey]: -rewardToken },
-        Data.to(updatedDatum, CampaignDatum)
+        Data.to(updatedDatum, CampaignDatum),
       );
     }
     const tx = await newTx.complete();
@@ -128,7 +128,7 @@ async function backerUtxo(lucid: LucidEvolution, utxos: UTxO[]) {
 
   // Filter out null results and type assert
   const processedUtxos = processedResults.filter(
-    (item): item is { utxo: UTxO; backerDatum: BackerDatum } => item !== null
+    (item): item is { utxo: UTxO; backerDatum: BackerDatum } => item !== null,
   );
 
   // Group UTxOs by BackerDatum and sum lovelace
@@ -156,6 +156,6 @@ function sumUtxoAmounts(utxos: UTxO[], rewardTokenKey: string) {
       acc.rewardToken += assets[rewardTokenKey] || 0n;
       return acc;
     },
-    { lovelace: 0n, rewardToken: 0n }
+    { lovelace: 0n, rewardToken: 0n },
   );
 }

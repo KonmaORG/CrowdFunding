@@ -36,7 +36,7 @@ export async function CreateCampaign(
   lucid: LucidEvolution,
   address: string,
   campaign: CampaignDatum,
-  description: string
+  description: string,
 ) {
   if (!lucid) throw Error("Uninitialized Lucid!!!");
   let utxo = await lucid.utxosAt(address);
@@ -69,17 +69,17 @@ export async function CreateCampaign(
     .readFrom(ref_utxo)
     .mintAssets(
       { ...stateToken, ...rewardToken },
-      Data.to(campaign, CampaignDatum)
+      Data.to(campaign, CampaignDatum),
     )
     .pay.ToContract(
       state_addr,
       { kind: "inline", value: Data.to(campaign, CampaignDatum) },
-      { lovelace: 2_000_000n, ...stateToken }
+      { lovelace: 2_000_000n, ...stateToken },
     )
     .pay.ToContract(
       script_addr,
       { kind: "inline", value: Data.to(campaign, CampaignDatum) },
-      { lovelace: 2_000_000n, ...rewardToken }
+      { lovelace: 2_000_000n, ...rewardToken },
     )
     .attachMetadata(721, {
       [PID]: {

@@ -28,7 +28,7 @@ import { emulator } from "@/config/emulator";
 export async function FinishCampaign(
   WalletConnection: WalletConnection,
   datum: CampaignDatum,
-  metadata: MetadataType
+  metadata: MetadataType,
 ) {
   const { lucid, address } = WalletConnection;
   try {
@@ -78,12 +78,12 @@ export async function FinishCampaign(
       .pay.ToContract(
         state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
-        { lovelace: 2_000_000n, ...stateToken }
+        { lovelace: 2_000_000n, ...stateToken },
       )
       .pay.ToContract(
         contarctAddress,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
-        { lovelace: lovelace }
+        { lovelace: lovelace },
       )
       .attach.SpendingValidator(Campaign_Validator)
       .attach.SpendingValidator(StateTokenValidator())
@@ -93,7 +93,7 @@ export async function FinishCampaign(
     if (rewardToken > 0) {
       newTx = newTx.mintAssets(
         rewardTokenBurn,
-        Data.to(updatedDatum, CampaignDatum)
+        Data.to(updatedDatum, CampaignDatum),
       );
     }
     const tx = await newTx.complete();
@@ -118,6 +118,6 @@ function sumUtxoAmounts(utxos: UTxO[], rewardTokenKey: string) {
       acc.rewardToken += assets[rewardTokenKey] || 0n;
       return acc;
     },
-    { lovelace: 0n, rewardToken: 0n }
+    { lovelace: 0n, rewardToken: 0n },
   );
 }

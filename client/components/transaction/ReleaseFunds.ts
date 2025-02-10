@@ -35,7 +35,7 @@ import { Milestone } from "lucide-react";
 export async function ReleaseFunds(
   WalletConnection: any,
   datum: any,
-  metadata: any
+  metadata: any,
 ) {
   const { address, lucid } = WalletConnection;
   try {
@@ -67,7 +67,7 @@ export async function ReleaseFunds(
       ...datum,
       state: "Finished",
       milestone: datum.milestone.map((val: any, i: any, a: boolean[]) =>
-        i === a.indexOf(false) ? true : val
+        i === a.indexOf(false) ? true : val,
       ),
     };
     // Campaign creator Address
@@ -78,7 +78,7 @@ export async function ReleaseFunds(
     const totalLovelace = sumUtxoAmounts(campaignUtxos).lovelace;
     const { platform, creator, script } = calulatePay(
       Number(totalLovelace),
-      datum.milestone
+      datum.milestone,
     );
 
     // tx
@@ -90,7 +90,7 @@ export async function ReleaseFunds(
       .pay.ToContract(
         state_addr,
         { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
-        { lovelace: 2_000_000n, [stateTokenKey]: 1n }
+        { lovelace: 2_000_000n, [stateTokenKey]: 1n },
       )
       .pay.ToAddress(creatorAddress, { lovelace: creator })
       .pay.ToAddress(PLATFORMADDR, { lovelace: platform })
@@ -104,7 +104,7 @@ export async function ReleaseFunds(
         .ToContract(
           contarctAddress,
           { kind: "inline", value: Data.to(updatedDatum, CampaignDatum) },
-          { lovelace: script as bigint }
+          { lovelace: script as bigint },
         )
         .complete();
     } else {
@@ -143,6 +143,6 @@ function sumUtxoAmounts(utxos: UTxO[]) {
       acc.lovelace += assets.lovelace || 0n;
       return acc;
     },
-    { lovelace: 0n }
+    { lovelace: 0n },
   );
 }

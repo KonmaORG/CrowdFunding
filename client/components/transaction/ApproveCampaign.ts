@@ -28,7 +28,7 @@ import {
 export async function ApproveCampaign(
   WalletConnection: WalletConnection,
   datum: CampaignDatum,
-  metadata: MetadataType
+  metadata: MetadataType,
 ) {
   const { lucid, address } = WalletConnection;
   try {
@@ -53,7 +53,7 @@ export async function ApproveCampaign(
     const stateToken = policyId + fromText("STATE_TOKEN");
     let UtxoWithStateToken: UTxO[] = await lucid.utxosAtWithUnit(
       state_addr,
-      stateToken
+      stateToken,
     );
 
     //   Redeemer & datum
@@ -70,7 +70,7 @@ export async function ApproveCampaign(
         {
           lovelace: 2_000_000n,
           [stateToken]: 1n,
-        }
+        },
       )
       .attach.SpendingValidator(StateTokenValidator())
       .addSigner(await privateKeytoAddress(SIGNER1))

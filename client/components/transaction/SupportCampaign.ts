@@ -26,7 +26,7 @@ export async function SupportCampaign(
   WalletConnection: WalletConnection,
   datum: CampaignDatum,
   metadata: MetadataType,
-  supportFraction: number
+  supportFraction: number,
 ) {
   const { lucid, address } = WalletConnection;
   try {
@@ -54,12 +54,12 @@ export async function SupportCampaign(
     // utxo with token
     let utxoWithRewardToken: UTxO[] = await lucid.utxosAtWithUnit(
       contarctAddress,
-      rewardToken
+      rewardToken,
     );
     // token qty at script
     const rewardTokenQty = remainingRewardToken(
       utxoWithRewardToken,
-      rewardToken
+      rewardToken,
     );
     // redeemer alreadt in Data format
     const redeemer = CampaignActionRedeemer.Support;
@@ -89,20 +89,20 @@ export async function SupportCampaign(
         {
           lovelace: 2_000_000n,
           [rewardToken]: BigInt(rewardTokenQty - supportFraction),
-        }
+        },
       );
     } else {
       newTx = newTx.pay.ToContract(
         contarctAddress,
         { kind: "inline", value: Data.to(datum, CampaignDatum) },
-        { lovelace: 2_000_000n }
+        { lovelace: 2_000_000n },
       );
     }
     const tx = await newTx.pay
       .ToContract(
         contarctAddress,
         { kind: "inline", value: Data.to(backerDatum, BackerDatum) },
-        { lovelace: payToContract }
+        { lovelace: payToContract },
       )
       .complete();
 
