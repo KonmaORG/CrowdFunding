@@ -67,3 +67,14 @@ FINISH
 
 - single
   - after multisig verify the amount-5% will go to dev addr
+
+/// Fraction can't be fraction
+/// Goal can't be fraction
+
+<!--  Multisig Finish Campaign-->
+<!-- Cancel Campaign -->
+
+TEST CANCEL functionality with
+
+- no reward token left in script
+- some reward token left in scrtip

@@ -13,15 +13,18 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@heroui/button";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
 
 export default function WalletComponent() {
   const [walletConnection, setWalletConnection] = useWallet();
-  const { lucid, address } = walletConnection;
+  const { lucid, address, isEmulator } = walletConnection;
 
   const [wallets, setWallets] = useState<Wallet[]>(SUPPORTEDWALLETS);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,18 +42,26 @@ export default function WalletComponent() {
       if (!wallet.apiVersion) continue;
       installedWallets.push(wallet);
     }
-    const updatedPreWallets = wallets.map((preWallet) => {
-      const matchingWallet = installedWallets.find((provider) =>
-        provider.name.toLowerCase().includes(preWallet.name.toLowerCase())
+    const updatedWallets = wallets;
+    installedWallets.forEach((provider) => {
+      const index = updatedWallets.findIndex(
+        (wallet) => wallet.name.toLowerCase() === provider.name.toLowerCase()
       );
-
-      return {
-        ...preWallet,
-        ...(matchingWallet && { enable: matchingWallet.enable }),
-      };
+      if (index !== -1) {
+        updatedWallets[index] = {
+          ...updatedWallets[index],
+          enable: provider.enable,
+        };
+      } else {
+        updatedWallets.push({
+          name: provider.name,
+          enable: provider.enable,
+          icon: provider.icon,
+        });
+      }
     });
 
-    setWallets(updatedPreWallets);
+    setWallets(updatedWallets.sort((a, b) => a.name.localeCompare(b.name)));
   }, []);
 
   async function onConnectWallet(wallet: Wallet) {
@@ -110,7 +121,7 @@ export default function WalletComponent() {
               )}
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="w-fit">
             <DialogHeader>
               <DialogTitle>Connect Wallet</DialogTitle>
               <DialogDescription>
@@ -135,6 +146,33 @@ export default function WalletComponent() {
                 </Button>
               ))}
             </div>
+            <DialogFooter>
+              {/* Emulator Toggle  */}
+              <div className="flex items-center justify-between rounded-lg border p-2 mx-2 w-full">
+                <div className="space-y-0.5">
+                  <Label className="text-base font-semibold">
+                    Emulator Mode
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    This will use Emulator Accounts.
+                  </p>
+                </div>
+                <Switch
+                  id="emulator-toggle"
+                  checked={isEmulator}
+                  onCheckedChange={(checked) => {
+                    setIsOpen(false);
+                    setTimeout(() => {
+                      setWalletConnection((prev) => ({
+                        ...prev,
+                        isEmulator: checked,
+                      }));
+                    }, 500);
+                  }}
+                  aria-label="Toggle emulator mode"
+                />
+              </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}

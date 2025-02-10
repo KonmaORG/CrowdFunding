@@ -1,12 +1,49 @@
-import { applyDoubleCborEncoding, Validator } from '@lucid-evolution/lucid'
+import {
+  applyDoubleCborEncoding,
+  applyParamsToScript,
+  Validator,
+} from "@lucid-evolution/lucid";
 
-import { karbonstore_karbonstore_spend } from './plutus'
+import {
+  state_token_script_state_token_script_spend,
+  crowdfunding_campaign_spend,
+  crowdfunding_campaign_mint,
+  identication_nft_identification_nft_mint,
+} from "./plutus";
+import { IdetificationPID } from "..";
 
+//------------------------------------------------------------------
 const identificationNFT_Mint = applyDoubleCborEncoding(
-  karbonstore_karbonstore_spend
-)
+  identication_nft_identification_nft_mint
+);
 
-export const KarbonStoreValidator: Validator = {
-  type: 'PlutusV3',
-  script: identificationNFT_Mint,
+export function IdentificationNFTValidator(params: any[]): Validator {
+  return {
+    type: "PlutusV3",
+    script: applyParamsToScript(identificationNFT_Mint, params),
+  };
+}
+
+// ------------------------------------------------------------------
+const state_token_script = applyDoubleCborEncoding(
+  state_token_script_state_token_script_spend
+);
+
+export function StateTokenValidator(): Validator {
+  return {
+    type: "PlutusV3",
+    script: applyParamsToScript(state_token_script, [IdetificationPID]),
+  };
+}
+
+//   ------------------------------------------------------------------
+const crowdfunding_script = applyDoubleCborEncoding(
+  crowdfunding_campaign_spend
+);
+
+export function CrowdfundingValidator(params: any[]): Validator {
+  return {
+    type: "PlutusV3",
+    script: applyParamsToScript(crowdfunding_script, params),
+  };
 }

@@ -3,8 +3,8 @@ use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Input, Output, OutputReference, Transaction}
 use crowdfunding/types.{
-  BackerDatum, CampaignAction, CampaignDatum, Cancel, ConfigDatum, Finish,
-  Refund, Release, Support,
+  BackerDatum, CampaignAction, CampaignDatum, Cancel, Cancelled, ConfigDatum,
+  Finish, Finished, Refund, Release, Running, Support,
 }
 use crowdfunding/utils
 use functions.{
@@ -22,16 +22,21 @@ validator campaign(
     policy_id self_script: PolicyId,
     tx: Transaction,
   ) {
-    let ConfigDatum { state_token_script, .. } =
-      utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
-    validate_create_campaign(
-      tx,
-      self_script,
-      campaign_datum,
-      nonce,
-      creator,
-      state_token_script,
-    )
+    when campaign_datum.state is {
+      Finished | Cancelled -> utils.must_burn_reward_token(tx, self_script)
+      _ -> {
+        let ConfigDatum { state_token_script, .. } =
+          utils.ref_inputs_to_config_datum(tx.reference_inputs, config_nft)
+        validate_create_campaign(
+          tx,
+          self_script,
+          campaign_datum,
+          nonce,
+          creator,
+          utils.script_address_from_tuple(state_token_script),
+        )
+      }
+    }
   }
 
   spend(
@@ -49,7 +54,11 @@ validator campaign(
       // Support campaign:
       (Some(current_datum), Support) ->
         if current_datum is campaign_datum: CampaignDatum {
-          validate_support_campaign(tx.outputs, campaign_datum, self_script)
+          validate_support_campaign(
+            tx,
+            self_script,
+            datum: CampaignDatum { ..campaign_datum, state: Running },
+          )
         } else {
           fail @"Invalid Cancel Datum Type! Must be CampaignDatum"
         }
@@ -61,7 +70,7 @@ validator campaign(
             self_script,
             campaign_datum,
             multisig,
-            state_token_script,
+            utils.script_address_from_tuple(state_token_script),
           )
         } else if current_datum is backer_datum: BackerDatum {
           tx |> validate_refund_support(self_script, backer_datum)
@@ -75,7 +84,7 @@ validator campaign(
           tx,
           self_script,
           current_datum,
-          state_token_script,
+          utils.script_address_from_tuple(state_token_script),
           multisig,
         )
       // Refund campaign:
@@ -93,7 +102,7 @@ validator campaign(
             self_script,
             campaign_datum,
             platform,
-            state_token_script,
+            utils.script_address_from_tuple(state_token_script),
             multisig,
           )
         } else {

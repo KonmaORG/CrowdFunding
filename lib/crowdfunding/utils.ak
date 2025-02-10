@@ -1,17 +1,32 @@
 use aiken/collection/dict
 use aiken/collection/list
 use aiken/crypto.{VerificationKeyHash}
+use aiken/interval.{Finite}
 use cardano/address.{Address, Inline, Script, VerificationKey}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{
-  InlineDatum, Input, Output, OutputReference, Transaction, find_input,
+  InlineDatum, Input, Output, OutputReference, Transaction, ValidityRange,
+  find_input,
 }
 use config
 use crowdfunding/types.{
-  BackerDatum, CampaignDatum, ConfigDatum, Initiated, Multisig, PaymentKeyHash,
-  Running, StakeKeyHash,
+  BackerDatum, CampaignDatum, Cancelled, ConfigDatum, Milestone, Multisig,
+  PaymentKeyHash, Running, StakeKeyHash,
 }
-use test_kit/time/unwrap
+
+// use test_kit/time/unwrap
+
+pub fn script_address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
+  let (pkh, skh) = key_hash_tuple
+  Address {
+    payment_credential: pkh |> Script,
+    stake_credential: if skh == "" {
+      None
+    } else {
+      skh |> Script |> Inline |> Some
+    },
+  }
+}
 
 pub fn address_from_tuple(key_hash_tuple: (PaymentKeyHash, StakeKeyHash)) {
   let (pkh, skh) = key_hash_tuple
@@ -67,24 +82,51 @@ pub fn must_send_state_reward_token(
 
     when datum is {
       // STATE token to state_token addr or self_script if state is not running
-      InlineDatum(output_datum) -> and {
-          if with_datum.state == Initiated {
-            address == state_token_address
-          } else {
-            address == self_address
+      InlineDatum(output_datum) -> or {
+          and {
+            assets.quantity_of(value, self_script, config.state_token) == 1,
+            // if with_datum.state == Initiated {
+            address == state_token_address,
+            // } else {
+            //   address == self_address
+            // },
+            output_datum == with_datum_data,
           },
-          output_datum == with_datum_data,
-          assets.quantity_of(value, self_script, config.state_token) == 1,
+          and {
+            address == self_address,
+            assets.quantity_of(value, self_script, with_datum.name) == with_datum.fraction,
+            output_datum == with_datum_data,
+          },
         }
 
       // REWARD token to self script addr
-      _ -> and {
-          address == self_address,
-          assets.quantity_of(value, self_script, with_datum.name) == with_datum.fraction,
-        }
+      _ -> False
     }
   }
+
   counter == 2
+}
+
+pub fn must_update_state_token(
+  tx: Transaction,
+  self_script: PolicyId,
+  state_token_address: Address,
+  with_datum: CampaignDatum,
+) -> Bool {
+  let with_datum_data: Data = with_datum
+  let Output { address, datum, value, .. } <- list.any(tx.outputs)
+
+  when datum is {
+    // STATE token to state_token addr or self_script if state is not running
+    InlineDatum(output_datum) -> and {
+        assets.quantity_of(value, self_script, config.state_token) == 1,
+        address == state_token_address,
+        output_datum == with_datum_data,
+      }
+
+    // REWARD token to self script addr
+    _ -> False
+  }
 }
 
 pub fn is_running_campaign(
@@ -100,18 +142,20 @@ pub fn is_running_campaign(
   // must be campaign inline datum
   expect InlineDatum(campaign_datum) = datum
   expect CampaignDatum { state, .. } = campaign_datum
-
   state == Running
 }
 
 pub fn must_be_signed_by(tx: Transaction, signer: VerificationKeyHash) -> Bool {
   // just expect 1 signer
-  ([signer] == tx.extra_signatories)?
+  [signer] == tx.extra_signatories
 }
 
-pub fn must_be_after_deadline(tx: Transaction, deadline: Int) -> Bool {
+pub fn must_be_after_deadline(
+  validity_range: ValidityRange,
+  deadline: Int,
+) -> Bool {
   // tx validFrom is after or at deadline
-  (unwrap.finite_start_of(tx.validity_range) >= deadline)?
+  !must_happen_before(validity_range, deadline)
 }
 
 pub fn must_refund(
@@ -153,7 +197,7 @@ pub fn must_refund(
     }
   let output_lovelace = list.reduce(tx.outputs, 0, sum_output)
 
-  (output_lovelace >= input_lovelace)?
+  output_lovelace >= input_lovelace
 }
 
 pub fn must_reach_goal_and_send_to_creator(
@@ -162,7 +206,7 @@ pub fn must_reach_goal_and_send_to_creator(
   campaign_datum: CampaignDatum,
   platform: VerificationKeyHash,
 ) {
-  let CampaignDatum { goal, creator, milestone, .. } = campaign_datum
+  let CampaignDatum { creator, milestone, .. } = campaign_datum
   let remaining_milestone = list.count(milestone, fn(m) { m == False })
   let self_address = Address(Script(self_script), None)
 
@@ -172,7 +216,7 @@ pub fn must_reach_goal_and_send_to_creator(
       if address == self_address {
         when datum is {
           InlineDatum(input_datum) ->
-            if input_datum is BackerDatum {
+            if input_datum is CampaignDatum {
               assets.lovelace_of(value) + sum
             } else {
               sum
@@ -183,9 +227,8 @@ pub fn must_reach_goal_and_send_to_creator(
         sum
       }
     }
-  // backer supports must reach goal (sum_support >= goal)?
   let supports = tx.inputs |> list.reduce(0, sum_support)
-  expect supports >= goal
+  // expect supports >= goal
   let (platform_pay, creator_pay) = calculate_payout_platform_creator(supports)
   let creator_address = address_from_tuple(creator)
 
@@ -211,8 +254,25 @@ pub fn must_reach_goal_and_send_to_creator(
         _ -> sum
       }
     }
-  // creator must receive backer supports (sum_creator >= sum_support)?
+
+  let sum_script =
+    fn(sum, Output { address, value, .. }) {
+      if address == self_address {
+        assets.lovelace_of(value) + sum
+      } else {
+        sum
+      }
+    }
+
+  let to_script =
+    if remaining_milestone > 1 {
+      list.reduce(tx.outputs, 0, sum_script) >= supports - supports / remaining_milestone
+    } else {
+      True
+    }
+
   and {
+    to_script,
     list.reduce(tx.outputs, 0, sum_creator) >= creator_pay / remaining_milestone,
     list.reduce(tx.outputs, 0, sum_platform) >= platform_pay / remaining_milestone,
   }
@@ -223,8 +283,7 @@ pub fn find_output_from_PID(
   policy_id: PolicyId,
   name: ByteArray,
 ) {
-  expect [supporter_output,
-    script_output] =
+  let token_output: List<Output> =
     list.filter(
       outputs,
       fn(output) {
@@ -232,10 +291,17 @@ pub fn find_output_from_PID(
         !dict.is_empty(has_reward_token)
       },
     )
+
+  expect Some(supporter_output) = list.at(token_output, 0)
+  let script_token =
+    when list.at(token_output, 1) is {
+      Some(script_output) ->
+        assets.quantity_of(script_output.value, policy_id, name)
+      None -> 0
+    }
   let reward_token_to_backer =
     assets.quantity_of(supporter_output.value, policy_id, name)
-  let script_token = assets.quantity_of(script_output.value, policy_id, name)
-
+  // let script_token = assets.quantity_of(script_output.value, policy_id, name)
   (reward_token_to_backer, script_token)
 }
 
@@ -263,7 +329,7 @@ pub fn atleast_signedby(
   atleast_signatories: Multisig,
 ) -> Bool {
   let Multisig { required, signers } = atleast_signatories
-  (required <= list.count(signers, fn(signer) { list.has(signatories, signer) }))?
+  required <= list.count(signers, fn(signer) { list.has(signatories, signer) })
 }
 
 pub fn ref_inputs_to_config_datum(
@@ -299,9 +365,118 @@ pub fn must_send_state_token(
     InlineDatum(output_datum) -> and {
         address == self_address,
         output_datum == with_datum_data,
-        value == self_input.output.value,
+        assets.match(value, self_input.output.value, >=),
       }
 
     _ -> False
   }
+}
+
+pub fn must_happen_before(range: ValidityRange, lock_expiration_time: Int) {
+  when range.lower_bound.bound_type is {
+    Finite(tx_latest_time) -> lock_expiration_time >= tx_latest_time
+    _ -> False
+  }
+}
+
+pub fn is_datum_addr_same(
+  outputs: List<Output>,
+  current_datum: CampaignDatum,
+  policy_id: PolicyId,
+) {
+  let current_datum_data: Data = current_datum
+  let script_add = Address(Script(policy_id), None)
+  list.any(
+    outputs,
+    fn(o) {
+      when o.datum is {
+        InlineDatum(output_datum) -> and {
+            current_datum_data == output_datum,
+            o.address == script_add,
+          }
+        _ -> False
+      }
+    },
+  )
+}
+
+pub fn must_pay_to_script(
+  tx: Transaction,
+  self_script: PolicyId,
+  campaign_datum: CampaignDatum,
+) {
+  let campaign_datum_data: Data = campaign_datum
+  let self_address = Address(Script(self_script), None)
+  let sum_support =
+    fn(sum, Input { output: Output { address, datum, value, .. }, .. }) {
+      if address == self_address {
+        when datum is {
+          InlineDatum(input_datum) ->
+            if input_datum is BackerDatum {
+              assets.lovelace_of(value) + sum
+            } else {
+              sum
+            }
+          _ -> sum
+        }
+      } else {
+        sum
+      }
+    }
+  let supports = tx.inputs |> list.reduce(0, sum_support)
+  list.any(
+    tx.outputs,
+    fn(o) {
+      when o.datum is {
+        InlineDatum(datum_data) -> and {
+            campaign_datum_data == datum_data,
+            o.address == self_address,
+            assets.lovelace_of(o.value) >= supports,
+          }
+        _ -> False
+      }
+    },
+  )
+}
+
+pub fn must_burn_reward_token(tx: Transaction, self_script: PolicyId) {
+  // list.has(tx.inputs, fn())
+  // TODO:  check if input have a rewardtoken if yes then make sure it is burned, 
+  // this will ensure the extra remaining tokens are not sent to anyone but burned
+  // even if someone doesn't add it to the input, still later on they can withdraw from script this token
+  when tx.mint |> assets.tokens(self_script) |> dict.to_pairs() is {
+    [Pair(_, q)] -> q < 0
+    [] -> True
+    _ -> fail
+  }
+}
+
+pub fn updating_datum_milestone(datum: CampaignDatum) -> CampaignDatum {
+  let milestones: Milestone = datum.milestone
+  expect Some(index) = list.index_of(milestones, False)
+  let updated_milestones =
+    list.indexed_map(
+      milestones,
+      fn(i, m) {
+        if i == index {
+          !m
+        } else {
+          m
+        }
+      },
+    )
+
+  CampaignDatum { ..datum, milestone: updated_milestones }
+}
+
+pub fn is_campaign_cancelled(outputs: List<Output>, self_script: PolicyId) {
+  expect Some(Output { datum, .. }) = {
+    let output <- list.find(outputs)
+    assets.quantity_of(output.value, self_script, config.state_token) == 1
+  }
+
+  // must be campaign inline datum
+  expect InlineDatum(campaign_datum) = datum
+  expect CampaignDatum { state, .. } = campaign_datum
+  state == Cancelled
 }
