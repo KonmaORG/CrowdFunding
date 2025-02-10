@@ -23,6 +23,7 @@ import {
   UTxO,
   validatorToAddress,
 } from "@lucid-evolution/lucid";
+import { emulator } from "@/config/emulator";
 
 export async function FinishCampaign(
   WalletConnection: WalletConnection,
@@ -67,6 +68,8 @@ export async function FinishCampaign(
     // ref_utxo
     const ref_utxo = await FindRefUtxo(lucid, state_addr);
     const date = await blockfrost.getLatestTime();
+    // const date = emulator.now();
+
     let newTx = lucid
       .newTx()
       .readFrom(ref_utxo)

@@ -103,6 +103,7 @@ pub fn validate_refund_support(
     trace @"calling refund function"
     utils.is_campaign_cancelled(tx.outputs, self_script),
     utils.must_refund(tx, self_script, backer_datum)?,
+    utils.must_burn_reward_token(tx, self_script),
   }
 }
 

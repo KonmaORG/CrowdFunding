@@ -440,13 +440,15 @@ pub fn must_pay_to_script(
 }
 
 pub fn must_burn_reward_token(tx: Transaction, self_script: PolicyId) {
-  let qty =
-    when tx.mint |> assets.tokens(self_script) |> dict.to_pairs() is {
-      [Pair(_, q)] -> q
-      [] -> -1
-      _ -> fail
-    }
-  qty < 0
+  // list.has(tx.inputs, fn())
+  // TODO:  check if input have a rewardtoken if yes then make sure it is burned, 
+  // this will ensure the extra remaining tokens are not sent to anyone but burned
+  // even if someone doesn't add it to the input, still later on they can withdraw from script this token
+  when tx.mint |> assets.tokens(self_script) |> dict.to_pairs() is {
+    [Pair(_, q)] -> q < 0
+    [] -> True
+    _ -> fail
+  }
 }
 
 pub fn updating_datum_milestone(datum: CampaignDatum) -> CampaignDatum {

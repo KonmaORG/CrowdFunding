@@ -61,8 +61,8 @@ export async function CreateCampaign(
 
   const ref_utxo = await FindRefUtxo(lucid, state_addr);
 
-  // const date = await blockfrost.getLatestTime();
-  const date = emulator.now();
+  const date = await blockfrost.getLatestTime();
+  // const date = emulator.now();
   const tx = await lucid
     .newTx()
     .collectFrom([utxo[0]])
